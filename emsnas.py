@@ -171,7 +171,7 @@ class EMsNAS:
                 shutil.copy(os.path.join(gen_dir, "net_{}.subnet".format(i)),
                             os.path.join(self.save_path, "failed", "it_{}_net_{}".format(it, i)))
 
-            top1_err.append(100 - stats['top1'])  # 错误率 = 100 - 正确率
+            top1_err.append(100 - stats['acc'])  # 错误率 = 100 - 正确率
             complexity.append(stats[self.sec_obj])
 
         return top1_err, complexity

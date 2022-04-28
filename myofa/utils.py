@@ -214,6 +214,8 @@ class MyNetwork(MyModule):
             # gcn_graph.save(f"gcnblock.png", format='png')
 
             x = gcn_net(x, adj)
+
+
             # if self.bn:
             #     x = self.apply_bn(x)  # batch norm
             x_all.append(x)

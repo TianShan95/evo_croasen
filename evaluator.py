@@ -55,7 +55,7 @@ def get_net_info(net, x, args,  measure_latency=None, print_info=True, clean=Fal
             cpu_latency = np.round(net_info[k]['val'], 2)
 
     return {
-        'params': np.round(net_info['params'] / 1e6, 2),
+        'params': np.round(net_info['params'] / 1e3, 2),
         # 'flops': np.round(net_info['flops'] / 1e6, 2),
         'gpu': gpu_latency, 'cpu': cpu_latency
     }
@@ -181,11 +181,11 @@ class OFAEvaluator:
 
         info['loss'], info['acc'] = loss, acc
 
-        save_path = os.path.join(log_dir, 'net.stats') if cfgs.save is None else cfgs.save
+        save_path = os.path.join(log_dir, 'net_stats.txt') if cfgs.save is None else cfgs.save
         if cfgs.save_config:
             import re
-            save_net_name = re.findall(r'\/(.*)\.subnet', args.subnet)[0].replace("/", "_")
-            OFAEvaluator.save_net_config(log_dir, subnet, "%s.config" % save_net_name)
+            save_net_name = re.findall(r'\/(.*)\_subnet', args.subnet)[0].replace("/", "_")
+            OFAEvaluator.save_net_config(log_dir, subnet, "%s_config.txt" % save_net_name)
             OFAEvaluator.save_net(log_dir, subnet, "%s.init" % save_net_name)
         with open(save_path, 'w') as handle:
             json.dump(info, handle)

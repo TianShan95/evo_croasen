@@ -63,9 +63,9 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
             # blocks.append(copy.deepcopy(layers))
             # layers = torch.nn.ModuleList()
 
-
         # 预测层
-        linear_blocks = torch.nn.ModuleList()
+        # linear_blocks = torch.nn.ModuleList()
+        linear_blocks = torch.nn.Sequential()
         self.linear_hidden_dim = []  # 全连接层 经过 width_ratio 的维度
         self.act_stages = []  # 每个子网络所使用的 激活函数
         self.linear_init_input_dim = 40  # 预测层初始输入为 40
@@ -81,14 +81,16 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
                 in_features_dim=linear_input_dim, out_features_dim=linear_output_dim, bias=True,
                 act_func=act, dropout_rate=dropout_rate
             )
-            linear_blocks.append(classifier)
+            # linear_blocks.append(classifier)
+            linear_blocks.add_module('linear_%d' % h_dim_index, classifier)
             linear_input_dim = linear_output_dim
         # 最后一层 全连接层
         classifier = DynamicLinearLayer(
             in_features_dim=linear_input_dim, out_features_dim=n_classes, bias=True,
             act_func='softmax', dropout_rate=dropout_rate
         )
-        linear_blocks.append(classifier)
+        # linear_blocks.append(classifier)
+        linear_blocks.add_module('last_linear', classifier)
 
         super(OFACoarsenGcnV1, self).__init__(blocks, linear_blocks, n_block_list, dropout_rate, out_gcn_vector, args.num_pool_matrix, args.mask, args.con_final, args.num_pool_final_matrix)
 
@@ -275,7 +277,8 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
     def get_active_subnet(self, preserve_weight=True):
 
         gcn_blocks = torch.nn.ModuleList()
-        linear_blocks = torch.nn.ModuleList()
+        # linear_blocks = torch.nn.ModuleList()
+        linear_blocks = torch.nn.Sequential()
         # classifier = copy.deepcopy(self.classifier)
 
         # gcn_blocks
@@ -295,7 +298,7 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
 
             # self.run_time_linear_hidden_dim.append(linear_output_dim)
             # self.run_time_act_stages.append(act)
-            linear_blocks.append(self.classifier_blocks[h_dim_index].get_active_subnet(linear_input_dim, h_dim, act, self.dropout_rate, preserve_weight=True))
+            linear_blocks.add_module('linear_%d' % h_dim_index, self.classifier_blocks[h_dim_index].get_active_subnet(linear_input_dim, h_dim, act, self.dropout_rate, preserve_weight=True))
 
             # classifier = DynamicLinearLayer(
             #     in_features_dim=linear_input_dim, out_features=linear_output_dim, bias=True,
@@ -310,7 +313,7 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
         #     in_features_dim=linear_input_dim, out_features=self.n_classes, bias=True,
         #     act_func='softmax', dropout_rate=self.dropout_rate
         # )
-        linear_blocks.append(self.classifier_blocks[-1].get_active_subnet(linear_input_dim, self.n_classes, act_func='softmax', dropout_rate=self.dropout_rate, preserve_weight=True))
+        linear_blocks.add_module('last_linear', self.classifier_blocks[-1].get_active_subnet(linear_input_dim, self.n_classes, act_func='softmax', dropout_rate=self.dropout_rate, preserve_weight=True))
 
         # import hiddenlayer as hl
         # # 构建一个 gcn 模型

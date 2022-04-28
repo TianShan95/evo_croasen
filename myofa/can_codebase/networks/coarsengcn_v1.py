@@ -6,6 +6,7 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from myofa.can_codebase.utils.flops_counter import profile
 from torch.autograd import Variable
 import numpy as np
 # from layers import *
@@ -24,6 +25,7 @@ class CoarsenGcnV1(MyNetwork):
         super(CoarsenGcnV1, self).__init__()
 
         self.gcn_blocks = gcn_blocks
+        print(classifier_layers)
         self.classifier_blocks = classifier_layers
 
         self.con_final = con_final
@@ -92,10 +94,11 @@ class CoarsenGcnV1(MyNetwork):
 
         # 预测层
         # x = torch.squeeze(output)
-        y_pred = output
-        for classifier_layer in self.classifier_blocks:
-            y_pred = classifier_layer(y_pred)
-
+        # y_pred = output
+        # for classifier_layer in self.classifier_blocks:
+        #     y_pred = classifier_layer(y_pred)
+        y_pred = self.classifier_blocks(output)
+        # flop, params = profile(self.classifier_blocks, (64, 40))
         # y_pred = self.pred_model(output)
         return y_pred, output
 

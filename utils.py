@@ -76,12 +76,12 @@ def prepare_eval_folder(path, configs, gpu=2, n_gpus=8, **kwargs):
     for i in range(0, len(configs), n_gpus//gpu):
         for j in range(n_gpus//gpu):
             if i + j < len(configs):
-                job = os.path.join(path, "net_{}.subnet".format(i + j))
+                job = os.path.join(path, "net_{}_subnet.txt".format(i + j))
                 with open(job, 'w') as handle:
                     json.dump(configs[i + j], handle)
                 bash_file.append(bash_command_template(
                     gpus=gpus[j], subnet=job, save=os.path.join(
-                        path, "net_{}.stats".format(i + j)), **kwargs))
+                        path, "net_{}_stats.txt".format(i + j)), **kwargs))
         bash_file.append('wait')
 
     with open(os.path.join(path, 'run_bash.sh'), 'w') as handle:

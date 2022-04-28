@@ -123,7 +123,18 @@ import numpy as np
 #     print(i)
 
 # 取出存储的配置中的网络权重参数
+# import torch
+# df = open('../experiment/evo_croasen/checkpoint/model_best.pth.tar', 'rb')
+# data = torch.load(df, encoding='bytes')
+# print(data)
+
 import torch
-df = open('../experiment/evo_croasen/checkpoint/model_best.pth.tar', 'rb')
-data = torch.load(df, encoding='bytes')
-print(data)
+import torch.nn as nn
+m = nn.Linear(20, 30)
+input = torch.randn(128, 3,20)
+output = m(input)
+print(output.size())
+flops = (torch.prod(torch.LongTensor(list(output.size()))) * input[0].size(1)).item()
+print((list(output.size())))
+print(input[0].size(1))
+print(flops)
