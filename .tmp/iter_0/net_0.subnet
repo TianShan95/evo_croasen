@@ -1,0 +1,1 @@
+{"di": 0, "norm": 1, "d": [3, 3], "wr": [1, 1], "drop": 0.005, "wd": 0.0005, "lr": 0.0005, "ogv": ["sum", "sum"], "act": ["relu", "relu", "relu", "relu", "relu", "relu", "relu", "relu"]}
