@@ -162,13 +162,13 @@ class EMsNAS:
 
         for i in range(len(archs)):
             try:
-                stats = json.load(open(os.path.join(gen_dir, "net_{}.stats".format(i))))
+                stats = json.load(open(os.path.join(gen_dir, "net_{}_stats.txt".format(i))))
             except FileNotFoundError:
                 # just in case the subprocess evaluation failed
                 stats = {'top1': 0, self.sec_obj: 1000}  # makes the solution artificially bad so it won't survive
                 # store this architecture to a separate in case we want to revisit after the search
                 os.makedirs(os.path.join(self.save_path, "failed"), exist_ok=True)
-                shutil.copy(os.path.join(gen_dir, "net_{}.subnet".format(i)),
+                shutil.copy(os.path.join(gen_dir, "net_{}_subnet.txt".format(i)),
                             os.path.join(self.save_path, "failed", "it_{}_net_{}".format(it, i)))
 
             top1_err.append(100 - stats['acc'])  # 错误率 = 100 - 正确率

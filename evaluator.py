@@ -184,7 +184,7 @@ class OFAEvaluator:
         save_path = os.path.join(log_dir, 'net_stats.txt') if cfgs.save is None else cfgs.save
         if cfgs.save_config:
             import re
-            save_net_name = re.findall(r'\/(.*)\_subnet', args.subnet)[0].replace("/", "_")
+            save_net_name = re.findall(r'\/(.*)\_subnet', args.subnet)[0].replace("/", "_")  # 'iter_0_net_0'
             OFAEvaluator.save_net_config(log_dir, subnet, "%s_config.txt" % save_net_name)
             OFAEvaluator.save_net(log_dir, subnet, "%s.init" % save_net_name)
         with open(save_path, 'w') as handle:
@@ -195,7 +195,7 @@ class OFAEvaluator:
 
 def main(args):
     """ one evaluation of a subnet or a config from a file """
-    args.subnet = '.tmp/iter_0/net_0.subnet'
+    args.subnet = '.tmp/iter_0/net_0_subnet.txt'
 
     mode = 'subnet'
     if args.config is not None:

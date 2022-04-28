@@ -1,0 +1,1 @@
+{"di": 0, "norm": 1, "d": [3, 3], "wr": [0.25, 1.0], "drop": 0.05, "wd": 0.004, "lr": 0.0005, "ogv": ["sum", "mean"], "act": ["leaky_relu", "relu6", "tanh", "tanh", "tanh", "sigmoid", "sigmoid", "tanh"]}

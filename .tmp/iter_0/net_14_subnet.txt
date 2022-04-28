@@ -1,0 +1,1 @@
+{"di": 0, "norm": 0, "d": [2, 3], "wr": [0.25, 1.0], "drop": 0.01, "wd": 0.0005, "lr": 0.001, "ogv": ["max", "max"], "act": ["leaky_relu", "sigmoid", "sigmoid", "relu", "sigmoid", "sigmoid", "leaky_relu", "sigmoid"]}
