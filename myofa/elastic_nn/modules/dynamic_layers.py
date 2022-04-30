@@ -343,12 +343,12 @@ class DynamicGcnLayer(MygcnModule):
 
         self.act = build_activation(self.act_func, inplace=True)
 
-        # 初始化权重值
-        for m in self.modules():
-            if isinstance(m, MygcnModule):
-                m.weight.data = nn.init.xavier_uniform_(m.weight.data, gain=nn.init.calculate_gain(self.act_func))
-                if m.bias is not None:
-                    m.bias.data = nn.init.constant_(m.bias.data, 0.0)
+        # # 初始化权重值
+        # for m in self.modules():
+        #     if isinstance(m, MygcnModule):
+        #         m.weight.data = nn.init.xavier_uniform_(m.weight.data, gain=nn.init.calculate_gain(self.act_func))
+        #         if m.bias is not None:
+        #             m.bias.data = nn.init.constant_(m.bias.data, 0.0)
 
     def apply_bn(self, x):
         ''' Batch normalization of 3D tensor x
