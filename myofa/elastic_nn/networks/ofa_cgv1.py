@@ -38,8 +38,12 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
 
 
         # inverted residual blocks
+        blocks = torch.nn.ModuleList()
         self.block_group_info = []
-        blocks = torch.nn.ModuleList()  # 存储 块
+        # self.gcn_calcu_flops_blocks = torch.nn.ModuleList()  # 存储 块
+        # gcn_sequential_01 = torch.nn.Sequential()  # 第一层的图卷积序列
+        # gcn_sequential_02 = torch.nn.Sequential()  # 第二层的图卷积序列
+
         # layers = torch.nn.ModuleList()  # 存储 层
         _block_index = 0
 
@@ -48,6 +52,27 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
         self.base_linear_hidden_dim = [360, 720]
         self.runtime_linear_hidden_dim = [360, 720]
         self.runtime_act_stages = ['relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu']
+
+        # # 图卷积层 每个图卷积块做成 sequential 以便于计算 flops
+        # for n_block_index, n_block in enumerate(n_block_list):  # 遍历图卷积块
+        #     self.block_group_info.append([_block_index + i for i in range(n_block)])
+        #     _block_index += n_block
+        #     input_dim = gcn_input_dim[n_block_index]
+        #     for i in range(n_block):  # 遍历每个图卷积block里面的层
+        #         output_dim = gcn_hidden_dim[n_block_index*max(self.depth_list)+i]
+        #         gcn_conv = DynamicGcnLayer(input_dim=input_dim, output_dim=output_dim, act_func=self.runtime_act_stages[i], device=self.device)  # 建立 图卷积层
+        #         # layers.append(gcn_conv)
+        #         input_dim = output_dim
+        #         if n_block_index == 0:
+        #             gcn_sequential_01.add_module('gcn_conv1_%d' % i, gcn_conv)
+        #         if n_block_index == 1:
+        #             gcn_sequential_02.add_module('gcn_conv2_%d' % i, gcn_conv)
+        #     if n_block_index == 0:
+        #         self.gcn_calcu_flops_blocks.append(gcn_sequential_01)
+        #     if n_block_index == 1:
+        #         self.gcn_calcu_flops_blocks.append(gcn_sequential_02)
+            # blocks.append(copy.deepcopy(layers))
+            # layers = torch.nn.ModuleList()
 
         # 图卷积层
         for n_block_index, n_block in enumerate(n_block_list):  # 遍历图卷积块
@@ -277,9 +302,28 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
     def get_active_subnet(self, preserve_weight=True):
 
         gcn_blocks = torch.nn.ModuleList()
+        gcn_sequential_01 = torch.nn.Sequential()
+        gcn_sequential_02 = torch.nn.Sequential()
         # linear_blocks = torch.nn.ModuleList()
         linear_blocks = torch.nn.Sequential()
         # classifier = copy.deepcopy(self.classifier)
+
+        # # gcn_blocks 便于计算 flops 的 gcn
+        # for stage_id, block_idx in enumerate(self.block_group_info):  # self.block_group_info = [[0, 1, 2], [3, 4, 5]]
+        #     depth = self.runtime_depth[stage_id]
+        #     active_idx = block_idx[:depth]  # 添加激活的层
+        #     stage_blocks = []
+        #     for idx in active_idx:
+        #         if stage_id == 0:
+        #             # exec(f'print(self.gcn_blocks[idx].gcn_conv1_{idx})')
+        #             # exec(f'self.gcn_blocks[idx].gcn_conv1_{idx}.get_active_subnet(self.runtime_act_stages[idx], self.dropout_rate, preserve_weight)')
+        #             exec(f"gcn_sequential_01.add_module('gcn_conv1_{idx}', self.gcn_blocks[stage_id].gcn_conv1_{idx}.get_active_subnet(self.runtime_act_stages[idx], {self.dropout_rate}, {preserve_weight}))")   # 激活子网络
+        #         elif stage_id == 1:
+        #             exec(f"gcn_sequential_02.add_module('gcn_conv2_{idx-3}', self.gcn_blocks[stage_id].gcn_conv2_{idx-3}.get_active_subnet(self.runtime_act_stages[idx], {self.dropout_rate}, {preserve_weight}))")   # 激活子网络
+        #     if stage_id == 0:
+        #         self.gcn_calcu_flops_blocks.append(gcn_sequential_01)
+        #     elif stage_id == 1:
+        #         self.gcn_calcu_flops_blocks.append(gcn_sequential_02)
 
         # gcn_blocks
         for stage_id, block_idx in enumerate(self.block_group_info):  # self.block_group_info = [[0, 1, 2], [3, 4, 5]]
@@ -298,7 +342,7 @@ class OFACoarsenGcnV1(CoarsenGcnV1):
 
             # self.run_time_linear_hidden_dim.append(linear_output_dim)
             # self.run_time_act_stages.append(act)
-            linear_blocks.add_module('linear_%d' % h_dim_index, self.classifier_blocks[h_dim_index].get_active_subnet(linear_input_dim, h_dim, act, self.dropout_rate, preserve_weight=True))
+            linear_blocks.add_module('linear_%d' % h_dim_index, self.classifier_blocks[h_dim_index].get_active_subnet(int(linear_input_dim), int(h_dim), act, self.dropout_rate, preserve_weight=True))
 
             # classifier = DynamicLinearLayer(
             #     in_features_dim=linear_input_dim, out_features=linear_output_dim, bias=True,

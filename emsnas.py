@@ -30,7 +30,7 @@ class EMsNAS:
         self.search_space = OFASearchSpace()
         self.save_path = kwargs.pop('save', '.tmp')  # path to save results
         self.resume = kwargs.pop('resume', None)  # resume search from a checkpoint
-        self.sec_obj = kwargs.pop('sec_obj', 'flops')  # second objective to optimize simultaneously
+        self.sec_obj = kwargs.pop('sec_obj', 'params')  # second objective to optimize simultaneously
         self.iterations = kwargs.pop('iterations', 30)  # number of iterations to run search 搜索的 代数
         self.n_doe = kwargs.pop('n_doe',
                                 100)  # number of architectures to train before fit surrogate model fit代理模型之前 要训练架构的数量

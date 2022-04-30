@@ -5,7 +5,7 @@
       <paths name="tianshan@127.0.0.1:10022">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/evo_coarsen" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/evo_coarsen" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

@@ -55,7 +55,9 @@ def get_net_info(net, x, args,  measure_latency=None, print_info=True, clean=Fal
             cpu_latency = np.round(net_info[k]['val'], 2)
 
     return {
-        'params': np.round(net_info['params'] / 1e3, 2),
+        # 'params': np.round(net_info['params'] / 1e3, 2),
+        'params': net_info['params'],
+        'flops': net_info['flops'],
         # 'flops': np.round(net_info['flops'] / 1e6, 2),
         'gpu': gpu_latency, 'cpu': cpu_latency
     }
@@ -142,13 +144,13 @@ class OFAEvaluator:
         print('Network model dump to %s' % model_path)
 
     @staticmethod
-    def eval(subnet, data_path, init_lr, weight_dacay, out_gcn_vector=None, dataset='imagenet', n_epochs=0, resolution=224, trn_batch_size=128, vld_batch_size=250,
+    def eval(subnet, data_path, init_lr, weight_dacay, out_gcn_vector=None, normalization=1, direction=0, dataset='chc', n_epochs=0, trn_batch_size=128, vld_batch_size=250,
              num_workers=4, valid_size=None, is_test=True, log_dir='../experiment/evo_croasen', measure_latency=None, no_logs=False, args=None):
 
         lut = {'cpu': 'data/i7-8700K_lut.yaml'}
 
-        run_config = get_run_config(init_lr=init_lr, weight_dacay=weight_dacay,
-                                    dataset=dataset, data_path=data_path, image_size=resolution, n_epochs=n_epochs,
+        run_config = get_run_config(init_lr=init_lr, weight_dacay=weight_dacay,normalization=normalization, direction=direction,
+                                    dataset=dataset, data_path=data_path, n_epochs=n_epochs,
                                     train_batch_size=trn_batch_size, test_batch_size=vld_batch_size,
                                     n_worker=num_workers, valid_size=valid_size, args=args)
 
@@ -195,7 +197,6 @@ class OFAEvaluator:
 
 def main(args):
     """ one evaluation of a subnet or a config from a file """
-    args.subnet = '.tmp/iter_0/net_0_subnet.txt'
 
     mode = 'subnet'
     if args.config is not None:
@@ -227,7 +228,7 @@ def main(args):
     weight_dacay = config['wd']  # weight_decay
     OFAEvaluator.eval(
         subnet, init_lr=init_lr, weight_dacay=weight_dacay, out_gcn_vector=config['ogv'], log_dir=args.log_dir, data_path=args.data, dataset=args.dataset, n_epochs=args.n_epochs,
-        trn_batch_size=args.trn_batch_size, vld_batch_size=args.vld_batch_size,
+        trn_batch_size=args.trn_batch_size, vld_batch_size=args.vld_batch_size,normalization=config['norm'], direction=config['di'],
         num_workers=args.num_workers, valid_size=args.valid_size, is_test=args.test, measure_latency=args.latency,
         no_logs=(not args.verbose), args=args)
 
@@ -244,7 +245,7 @@ if __name__ == '__main__':
                         help='number of classes for the given dataset normal or intrusion')
     parser.add_argument('--supernet_path', type=str, default='../experiment/evo_croasen/super_net/super_model_best.pth.tar',
                         help='file path to supernet weights')
-    parser.add_argument('--subnet', type=str, default=None,
+    parser.add_argument('--subnet', type=str, default='.tmp/iter_0/net_1_subnet.txt',
                         help='location of a json file of config eg: num of gcn')
     parser.add_argument('--config', type=str, default=None,
                         help='location of a json file of specific model declaration')

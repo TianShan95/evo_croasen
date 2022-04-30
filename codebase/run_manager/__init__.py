@@ -63,10 +63,10 @@ class ChcRunConfig(RunConfig):
                  dynamic_static='D',
                  csv_num='1_2',
                  pool_sizes='10',
-                 normalization=True,
+                 normalization=1,
+                 direction=0,
                  randGen=True,
                  seed=1,
-                 gs=200,
                  args=None,
                  weight_dacay=None,
                  **kwargs):
@@ -92,7 +92,7 @@ class ChcRunConfig(RunConfig):
             data_path = args.datadir + 'MergeTrainSub_D/'
             data_out_dir = data_path + 'MergeTrainSub_D_0_1_2_sub_processed/ps_' + args.pool_sizes
             # 标记 邻接矩阵是否 拉普拉斯 归一化
-            data_out_dir = data_out_dir + '_nor_' + str(bool(args.norm)) + '_' \
+            data_out_dir = data_out_dir + '_nor_' + str(bool(normalization)) + '_' \
             # 是否是随机生成 还是 固定大小
             if args.randGen:
                 data_out_dir = data_out_dir + 'random_' + str(args.seed) + '/'
@@ -100,11 +100,11 @@ class ChcRunConfig(RunConfig):
                 data_out_dir = data_out_dir + str(args.gs) + '/'
 
             if args.randGen:
-                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(args.Di_graph)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'
-                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(args.Di_graph)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'  # 原始
+                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(direction)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'
+                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(direction)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'  # 原始
             else:
-                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(args.Di_graph)}.pth'
-                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(args.Di_graph)}.pth'
+                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(direction)}.pth'
+                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(direction)}.pth'
 
         else:
             # 若没有 dataset 则生成 dataset
@@ -118,8 +118,8 @@ class ChcRunConfig(RunConfig):
 
             data_out_dir = data_path + 'processed/ps_' + args.pool_sizes
             # 标记 邻接矩阵是否 拉普拉斯 归一化
-            data_out_dir = data_out_dir + '_nor_' + str(bool(args.norm)) + '_' \
-                # 是否是随机生成 还是 固定大小
+            data_out_dir = data_out_dir + '_nor_' + str(bool(normalization)) + '_' \
+            # 是否是随机生成 还是 固定大小
             if args.randGen:
                 data_out_dir = data_out_dir + 'random_' + str(args.seed) + '/'
             else:
@@ -127,11 +127,11 @@ class ChcRunConfig(RunConfig):
 
 
             if args.randGen:
-                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(args.Di_graph)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'
-                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(args.Di_graph)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'  # 原始
+                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(direction)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'
+                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(direction)}_{args.msg_smallest_num}_{args.msg_biggest_num}.pth'  # 原始
             else:
-                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(args.Di_graph)}.pth'
-                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(args.Di_graph)}.pth'
+                graph_list_file_name = f'{data_out_dir}/graphs_list_Di_{str(direction)}.pth'
+                dataset_file_name = f'{data_out_dir}/dataset_Di_{str(direction)}.pth'
 
         logger.info(f'查找数据集的文件位置是 {data_out_dir}')
         # 若 数据文件夹 不存在 则新建
@@ -168,7 +168,7 @@ class ChcRunConfig(RunConfig):
                 p = OnlyGraphData(args)
 
             #
-            graphs = load_graph_origin_dataset_file.read_graphfile(p.output_name_suffix, args.Di_graph,
+            graphs = load_graph_origin_dataset_file.read_graphfile(p.output_name_suffix, direction,
                                               max_nodes=args.max_nodes)  # 从数据集得到图对象
             logger.info(f'Data length before filtering: {len(graphs)}')
 
@@ -201,7 +201,7 @@ class ChcRunConfig(RunConfig):
                     # print('Test pool_sizes:  ', pool_sizes)
                     coarsen_graph = gp(adj.todense().astype(float), pool_sizes)
                     # if args.method == 'wave':
-                    coarsen_graph.coarsening_pooling(args.normalize)
+                    coarsen_graph.coarsening_pooling(bool(normalization))
                     graphs_list.append(coarsen_graph)  # 坍缩图
             logger.info(f'Data length after filtering: {len(graphs)}, {len(graphs_list)}')
             logger.info('Dataset preprocessed, dumping....')

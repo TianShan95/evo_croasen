@@ -128,13 +128,105 @@ import numpy as np
 # data = torch.load(df, encoding='bytes')
 # print(data)
 
+# import torch
+# import torch.nn as nn
+# from torchprofile import profile_macs
+# from myofa.can_codebase.utils.flops_counter import profile
+#
+# import copy
+# from ptflops import get_model_complexity_info
+
+# net = nn.Sequential(
+#     nn.Linear(40, 20),
+#     nn.ReLU(),
+#     nn.Linear(20, 10),
+#     nn.ReLU(),
+#     nn.Linear(10, 2),
+#     nn.Softmax(),
+# )
+# x = torch.randn(64, 40)
+# y = net(x)
+# print(y.shape)
+# flops1 = int(profile_macs(copy.deepcopy(net), x))
+# print(flops1)
+# flops2, _ = profile(net, (64, 40))
+# print(flops2)
+# flops2, params = get_model_complexity_info(net, (64, 40), as_strings=True, print_per_layer_stat=True)
+# print(flops2)
+
+
+
 import torch
 import torch.nn as nn
-m = nn.Linear(20, 30)
-input = torch.randn(128, 3,20)
-output = m(input)
-print(output.size())
-flops = (torch.prod(torch.LongTensor(list(output.size()))) * input[0].size(1)).item()
-print((list(output.size())))
-print(input[0].size(1))
-print(flops)
+from torchprofile import profile_macs
+from myofa.can_codebase.utils.flops_counter import profile
+import torch.nn.functional as F
+import copy
+from ptflops import get_model_complexity_info
+
+class GraphConv(nn.Module):
+    def __init__(self, input_dim, output_dim, add_self=False, normalize_embedding=False,
+                 dropout=0.0, bias=True, device='cpu'):
+        super(GraphConv, self).__init__()
+        self.add_self = add_self
+        self.dropout = dropout
+
+        if dropout > 0.001:
+            self.dropout_layer = nn.Dropout(p=dropout).to(device)
+        self.normalize_embedding = normalize_embedding
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim)).to(device)
+        if bias:
+            self.bias = nn.Parameter(torch.FloatTensor(output_dim)).to(device)
+        else:
+            self.bias = None
+
+    def forward(self, x, adj):
+        if self.dropout > 0.001:
+            x = self.dropout_layer(x)
+        y = torch.matmul(adj, x)
+        if self.add_self:
+            y += x
+
+        # print('weight shape: ')
+        # print(self.weight.shape)
+        y = torch.matmul(y, self.weight)
+
+        if self.bias is not None:
+            y = y + self.bias
+        if self.normalize_embedding:
+            y = F.normalize(y, p=2, dim=2)
+        return y
+
+gcn_net = GraphConv(81, 20)
+gcn_net1 = GraphConv(20, 20)
+net_sequential = nn.Sequential(gcn_net, gcn_net1)
+
+x = torch.randint(0, 81, (64, 81, 81)).float()
+adj = torch.randint(0, 2, (64, 81, 81)).float()
+y = net_sequential(x, adj)
+print(y.shape)
+flops1 = int(profile_macs(copy.deepcopy(net_sequential), (x, adj)))
+print(flops1)
+
+# import torch.nn as nn
+# block = nn.ModuleList()
+# net_sequential1 = nn.Sequential()
+# net_sequential2 = nn.Sequential()
+#
+# net1 = nn.Linear(60, 40)
+# net2 = nn.Linear(40, 20)
+#
+# net_sequential1.add_module('net1', net1)
+# net_sequential1.add_module('net2', net2)
+# exec(f'block.append(net_sequential1)')
+#
+# net3 = nn.Linear(20, 10)
+# net4 = nn.Linear(10, 2)
+# exec(f"net_sequential2.add_module('net3', net3)")
+# net_sequential2.add_module('net4', net4)
+# exec(f'block.append(net_sequential2)')
+# print(block)
+# print(block[1].net3)
+# print('okkk')

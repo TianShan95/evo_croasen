@@ -34,6 +34,8 @@ def build_activation(act_func, inplace=True):
         return nn.ReLU(inplace=inplace)
     elif act_func == 'relu6':
         return nn.ReLU6(inplace=inplace)
+    elif act_func == 'leaky_relu':
+        return nn.LeakyReLU(inplace=inplace)
     elif act_func == 'tanh':
         return nn.Tanh()
     elif act_func == 'sigmoid':

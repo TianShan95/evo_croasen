@@ -13,7 +13,7 @@ import numpy as np
 from myofa.layers import set_layer_from_config, MBInvertedConvLayer, ConvLayer, IdentityLayer, LinearLayer
 # from ofa.imagenet_codebase.utils import MyNetwork, make_divisible
 # from ofa.imagenet_codebase.networks.proxyless_nets import MobileInvertedResidualBlock
-
+from torchprofile import profile_macs
 from myofa.utils import MyNetwork
 from myofa.can_codebase.networks.graph_encoders import WavePoolingGcnEncoder
 from myofa.can_codebase.networks.graph_encoders import Pool
@@ -25,7 +25,7 @@ class CoarsenGcnV1(MyNetwork):
         super(CoarsenGcnV1, self).__init__()
 
         self.gcn_blocks = gcn_blocks
-        print(classifier_layers)
+        # print(classifier_layers)
         self.classifier_blocks = classifier_layers
 
         self.con_final = con_final
@@ -98,8 +98,7 @@ class CoarsenGcnV1(MyNetwork):
         # for classifier_layer in self.classifier_blocks:
         #     y_pred = classifier_layer(y_pred)
         y_pred = self.classifier_blocks(output)
-        # flop, params = profile(self.classifier_blocks, (64, 40))
-        # y_pred = self.pred_model(output)
+
         return y_pred, output
 
     def loss(self, pred, label):

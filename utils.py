@@ -275,6 +275,16 @@ def get_net_info(net, x, args, measure_latency=None, print_info=True, clean=Fals
 
     # flops
     # net_info['flops'] = int(profile_macs(copy.deepcopy(net), x_trace))
+    x_trace = torch.randn(64, 40).to(device)
+    flop_classifier = profile_macs(net.classifier_blocks, x_trace)
+
+    flops_gcn = 0
+    for gcn_net in net.gcn_blocks:
+        x_gcn_trace_01 = torch.randint(0, 81, (64, 81, gcn_net.input_dim)).float().to(device)
+        adj_gcn_trace_01 = torch.randint(0, 2, (64, 81, 81)).float().to(device)
+        flops_gcn += profile_macs(copy.deepcopy(gcn_net), (x_gcn_trace_01, adj_gcn_trace_01))
+
+    net_info['flops'] = flops_gcn + flop_classifier
 
     # latencies
     # latency_types = [] if measure_latency is None else measure_latency.split('#')
@@ -295,8 +305,8 @@ def get_net_info(net, x, args, measure_latency=None, print_info=True, clean=Fals
 
     if print_info:
         # print(net)
-        print('Total training params: %.2fM' % (net_info['params'] / 1e6))
-        # print('Total FLOPs: %.2fM' % (net_info['flops'] / 1e6))
+        print('Total training params: %d' % (net_info['params']))
+        print('Total FLOPs: %d' % (net_info['flops']))
         # for l_type in latency_types:
         #     print('Estimated %s latency: %.3fms' % (l_type, net_info['%s latency' % l_type]['val']))
 
