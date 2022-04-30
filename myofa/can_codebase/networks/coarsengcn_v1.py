@@ -88,7 +88,7 @@ class CoarsenGcnV1(MyNetwork):
             out_all.append(out)
 
         # if self.concat:
-        output = torch.cat(out_all, dim=1)
+        output = torch.cat(out_all, dim=1).to(self.device)
         # else:
         #     output = out
 

@@ -156,59 +156,59 @@ import numpy as np
 
 
 
-import torch
-import torch.nn as nn
-from torchprofile import profile_macs
-from myofa.can_codebase.utils.flops_counter import profile
-import torch.nn.functional as F
-import copy
-from ptflops import get_model_complexity_info
-
-class GraphConv(nn.Module):
-    def __init__(self, input_dim, output_dim, add_self=False, normalize_embedding=False,
-                 dropout=0.0, bias=True, device='cpu'):
-        super(GraphConv, self).__init__()
-        self.add_self = add_self
-        self.dropout = dropout
-
-        if dropout > 0.001:
-            self.dropout_layer = nn.Dropout(p=dropout).to(device)
-        self.normalize_embedding = normalize_embedding
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim)).to(device)
-        if bias:
-            self.bias = nn.Parameter(torch.FloatTensor(output_dim)).to(device)
-        else:
-            self.bias = None
-
-    def forward(self, x, adj):
-        if self.dropout > 0.001:
-            x = self.dropout_layer(x)
-        y = torch.matmul(adj, x)
-        if self.add_self:
-            y += x
-
-        # print('weight shape: ')
-        # print(self.weight.shape)
-        y = torch.matmul(y, self.weight)
-
-        if self.bias is not None:
-            y = y + self.bias
-        if self.normalize_embedding:
-            y = F.normalize(y, p=2, dim=2)
-        return y
-
-gcn_net = GraphConv(81, 20)
-gcn_net1 = GraphConv(20, 20)
-net_sequential = nn.Sequential(gcn_net, gcn_net1)
-
-x = torch.randint(0, 81, (64, 81, 81)).float()
-adj = torch.randint(0, 2, (64, 81, 81)).float()
-y = net_sequential(x, adj)
-print(y.shape)
-flops1 = int(profile_macs(copy.deepcopy(net_sequential), (x, adj)))
-print(flops1)
+# import torch
+# import torch.nn as nn
+# from torchprofile import profile_macs
+# from myofa.can_codebase.utils.flops_counter import profile
+# import torch.nn.functional as F
+# import copy
+# from ptflops import get_model_complexity_info
+#
+# class GraphConv(nn.Module):
+#     def __init__(self, input_dim, output_dim, add_self=False, normalize_embedding=False,
+#                  dropout=0.0, bias=True, device='cpu'):
+#         super(GraphConv, self).__init__()
+#         self.add_self = add_self
+#         self.dropout = dropout
+#
+#         if dropout > 0.001:
+#             self.dropout_layer = nn.Dropout(p=dropout).to(device)
+#         self.normalize_embedding = normalize_embedding
+#         self.input_dim = input_dim
+#         self.output_dim = output_dim
+#         self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim)).to(device)
+#         if bias:
+#             self.bias = nn.Parameter(torch.FloatTensor(output_dim)).to(device)
+#         else:
+#             self.bias = None
+#
+#     def forward(self, x, adj):
+#         if self.dropout > 0.001:
+#             x = self.dropout_layer(x)
+#         y = torch.matmul(adj, x)
+#         if self.add_self:
+#             y += x
+#
+#         # print('weight shape: ')
+#         # print(self.weight.shape)
+#         y = torch.matmul(y, self.weight)
+#
+#         if self.bias is not None:
+#             y = y + self.bias
+#         if self.normalize_embedding:
+#             y = F.normalize(y, p=2, dim=2)
+#         return y
+#
+# gcn_net = GraphConv(81, 20)
+# gcn_net1 = GraphConv(20, 20)
+# net_sequential = nn.Sequential(gcn_net, gcn_net1)
+#
+# x = torch.randint(0, 81, (64, 81, 81)).float()
+# adj = torch.randint(0, 2, (64, 81, 81)).float()
+# y = net_sequential(x, adj)
+# print(y.shape)
+# flops1 = int(profile_macs(copy.deepcopy(net_sequential), (x, adj)))
+# print(flops1)
 
 # import torch.nn as nn
 # block = nn.ModuleList()
@@ -230,3 +230,53 @@ print(flops1)
 # print(block)
 # print(block[1].net3)
 # print('okkk')
+
+
+# import torch
+# from torch import nn
+# a = torch.tensor([0.5, 0.2], requires_grad=True)
+# b = nn.Tanh()(a)
+# # b = nn.Linear(1,1)(a)
+# print(b)
+# b *= 1
+# # b = b * 1
+# b.sum().backward()
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# net = nn.Sequential(
+#     nn.Linear(20, 2),
+#     nn.Tanh()
+# )
+# linear = nn.Linear(50, 30)
+# weight = linear.weight[:20, :2]
+
+# x = torch.randn(64, 20)
+# y = torch.randint(0, 2, (64,))
+# nn.Tanh()(F.linear(x, weight))
+# net.train()
+# pred = net(x)
+
+
+# class Net(nn.Module):
+#     def __init__(self, input_dim, output_dim):
+#         super().__init__()
+#         self.input_dim = input_dim
+#         self.output_dim = output_dim
+#         self.linear = nn.Linear(input_dim, output_dim)
+#     def forward(self, x):
+#         weight = self.linear.weight[:2, :20]
+#         bias = self.linear.bias[:2]
+#         return nn.Tanh()(F.linear(x, weight.clone(), bias.clone()))
+#
+# net = Net(50, 30)
+# net.train()
+# ypred = net(x)
+# loss = F.cross_entropy(ypred, y)
+# loss.backward()
+
+a = [1, 2, 3, 4]
+b = [7, 8, 9]
+print(a+b)

@@ -20,6 +20,7 @@ class OFASearchSpace:
         self.lr = [5e-4, 1e-3, 5e-3, 1e-2]  # 5e-4 lr
         self.out_gcn_vector = ['sum', 'mean', 'max']  # concat ogv
         self.act = ['sigmoid', 'tanh', 'relu', 'leaky_relu', 'relu6']  # relu act
+        self.linear_act = ['relu', 'leaky_relu', 'relu6']
 
     # def sample(self, n_samples=1, nb=None, ks=None, e=None, d=None, r=None):
     #     """ randomly sample an architecture"""
@@ -41,7 +42,7 @@ class OFASearchSpace:
     #         data.append({'ks': kernel_size, 'e': exp_ratio, 'd': depth, 'r': resolution})
     #     return data
 
-    def sample1(self, n_samples=1, gb=None, di=None, norm=None, d=None, wr=None, drop=None, wd=None, lr=None, ogv=None, act=None):
+    def sample1(self, n_samples=1, gb=None, di=None, norm=None, d=None, wr=None, drop=None, wd=None, lr=None, ogv=None, act=None, linear_act=None):
         """ randomly sample an architecture"""
         gb = self.gcn_blocks if gb is None else gb
         di = self.direction if di is None else di
@@ -53,6 +54,7 @@ class OFASearchSpace:
         lr = self.lr if lr is None else lr
         ogv = self.out_gcn_vector if ogv is None else ogv
         act = self.act if act is None else act
+        linear_act = self.linear_act if linear_act is None else linear_act
 
         data = []
         for n in range(n_samples):
@@ -74,7 +76,7 @@ class OFASearchSpace:
             handle_gcn_vector = np.random.choice(ogv, size=self.gcn_blocks, replace=True).tolist()
             # activation
             activation = np.random.choice(act, size=max(self.depth)*self.gcn_blocks+self.linear_num, replace=True).tolist()
-
+            activation_all = activation + np.random.choice(linear_act, size=self.linear_num, replace=True).tolist()
             # # first sample layers
             # depth = np.random.choice(d, nb, replace=True).tolist()
             # # then sample kernel size, expansion rate and resolution
@@ -84,7 +86,7 @@ class OFASearchSpace:
 
             # data.append({'ks': kernel_size, 'e': exp_ratio, 'd': depth, 'r': resolution})
             data.append({'di': direction, 'norm': normalization, 'd': depth, 'wr': width_rate, 'drop': dropout,
-                         'wd': weight_decay, 'lr': learning_rate, 'ogv': handle_gcn_vector, 'act': activation})
+                         'wd': weight_decay, 'lr': learning_rate, 'ogv': handle_gcn_vector, 'act': activation_all})
 
         return data
 
