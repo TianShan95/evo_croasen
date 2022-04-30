@@ -75,7 +75,7 @@ class OFASearchSpace:
             # out gcn vector
             handle_gcn_vector = np.random.choice(ogv, size=self.gcn_blocks, replace=True).tolist()
             # activation
-            activation = np.random.choice(act, size=max(self.depth)*self.gcn_blocks+self.linear_num, replace=True).tolist()
+            activation = np.random.choice(act, size=max(self.depth)*self.gcn_blocks, replace=True).tolist()
             activation_all = activation + np.random.choice(linear_act, size=self.linear_num, replace=True).tolist()
             # # first sample layers
             # depth = np.random.choice(d, nb, replace=True).tolist()
