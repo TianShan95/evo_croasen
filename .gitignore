@@ -1,3 +1,4 @@
 /.tmp/
 /.idea/
-.DS_Storels
+/__pycache__
+.DS_Store
