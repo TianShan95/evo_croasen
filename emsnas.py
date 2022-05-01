@@ -150,7 +150,7 @@ class EMsNAS:
 
     def _evaluate(self, archs, it):
         gen_dir = os.path.join(self.save_path, "iter_{}".format(it))
-        prepare_eval_folder(
+        python_order = prepare_eval_folder(
             gen_dir, archs, self.gpu, self.n_gpus, data=self.data, dataset=self.dataset,
             n_classes=self.n_classes, supernet_path=self.supernet_path,
             num_workers=self.n_workers, valid_size=self.vld_size,
@@ -159,8 +159,37 @@ class EMsNAS:
 
         subprocess.call("sh {}/run_bash.sh".format(gen_dir), shell=True)
 
+        top1_err, complexity = [], []
+
+        for i in range(len(archs)):
+            try:
+                stats = json.load(open(os.path.join(gen_dir, "net_{}_stats.txt".format(i))))
+            except FileNotFoundError:
+                # just in case the subprocess evaluation failed
+                # 查找不到 stats 文件 则直接运行某条指令
+                run_times = 0
+                while True:
+                    # subprocess.call('ls', shell=True)
+                    subprocess.call(python_order[i], shell=True)
+                    try:
+                        stats = json.load(open(os.path.join(gen_dir, "net_{}_stats.txt".format(i))))
+                        break
+                    except Exception as e:
+                        run_times += 1
+                        print(f'fail-{run_times}-{e}')
+                    if run_times >= 3:  # 执行 3 次还未出现结果文件则 赋予最差结果
+                        stats = {'acc': 0, self.sec_obj: 1}  # makes the solution artificially bad so it won't survive
+                        # store this architecture to a separate in case we want to revisit after the search
+                        os.makedirs(os.path.join(self.save_path, "failed"), exist_ok=True)
+                        shutil.copy(os.path.join(gen_dir, "net_{}_subnet.txt".format(i)),
+                                    os.path.join(self.save_path, "failed", "it_{}_net_{}".format(it, i)))
+                        break
+
+            top1_err.append(1 - stats['acc'])  # 错误率 = 100 - 正确率
+            complexity.append(stats[self.sec_obj])
+
+        # evaluate 运行结果排序
         results = []
-        # 运行结果排序
         result_log = gen_dir + "/iter_{}".format(it) + '_result.log'
         with open(result_log, 'r') as f:
             for line in f:
@@ -170,22 +199,6 @@ class EMsNAS:
         with open(result_log, 'w') as f:
             for i in results:
                 f.write(f'{i}\n')
-
-        top1_err, complexity = [], []
-
-        for i in range(len(archs)):
-            try:
-                stats = json.load(open(os.path.join(gen_dir, "net_{}_stats.txt".format(i))))
-            except FileNotFoundError:
-                # just in case the subprocess evaluation failed
-                stats = {'top1': 0, self.sec_obj: 1000}  # makes the solution artificially bad so it won't survive
-                # store this architecture to a separate in case we want to revisit after the search
-                os.makedirs(os.path.join(self.save_path, "failed"), exist_ok=True)
-                shutil.copy(os.path.join(gen_dir, "net_{}_subnet.txt".format(i)),
-                            os.path.join(self.save_path, "failed", "it_{}_net_{}".format(it, i)))
-
-            top1_err.append(100 - stats['acc'])  # 错误率 = 100 - 正确率
-            complexity.append(stats[self.sec_obj])
 
         return top1_err, complexity
 
@@ -339,7 +352,7 @@ if __name__ == '__main__':
                         help='second objective to optimize simultaneously')
     parser.add_argument('--iterations', type=int, default=30,
                         help='number of search iterations')
-    parser.add_argument('--n_doe', type=int, default=16,
+    parser.add_argument('--n_doe', type=int, default=128,
                         help='initial sample size for DOE')
     parser.add_argument('--n_iter', type=int, default=8,
                         help='number of architectures to high-fidelity eval (low level) in each iteration')
@@ -365,7 +378,7 @@ if __name__ == '__main__':
                         help='train batch size for training')
     parser.add_argument('--vld_batch_size', type=int, default=200,
                         help='test batch size for inference')
-    parser.add_argument('--n_epochs', type=int, default=5,
+    parser.add_argument('--n_epochs', type=int, default=50,
                         help='number of epochs for CNN training')
     parser.add_argument('--test', action='store_true', default=False,
                         help='evaluation performance on testing set')

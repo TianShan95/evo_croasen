@@ -280,16 +280,20 @@ import torch.nn.functional as F
 # a = [1, 2, 3, 4]
 # b = [7, 8, 9]
 # print(a+b)
-import re
-with open('iter_0_result.log') as f:
-    for line in f:
-        results = line.split('!')
-results = [x.strip() for x in results if x.strip() != '']
-results.sort(key=lambda x : int(re.findall(r'net_(\d+)_subnet.txt', x)[0]))
-# results.sort()
-
-print(results)
+# import re
+# with open('iter_0_result.log') as f:
+#     for line in f:
+#         results = line.split('!')
+# results = [x.strip() for x in results if x.strip() != '']
+# results.sort(key=lambda x : int(re.findall(r'net_(\d+)_subnet.txt', x)[0]))
+# # results.sort()
+#
+# print(results)
 
 # img_list = [4, 2, 1, 9, 3]
 # img_list.sort(key = lambda x: int(x))
 # print(img_list)
+
+import subprocess
+print('test.py')
+subprocess.call('python test1.py', shell=True)

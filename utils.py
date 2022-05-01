@@ -63,6 +63,11 @@ def bash_command_template(**kwargs):
                     execution_line += " --{}".format(k)
             else:
                 execution_line += " --{} {}".format(k, v)
+    execution_line += ' 2>&1'
+    import os
+    log_file_name = os.path.basename(cfg['save']).replace('stats', 'log')
+    log_path = os.path.dirname(cfg['save']) + '/' + log_file_name
+    execution_line += ' | tee ' + log_path
     execution_line += ' &'
     return execution_line
 
@@ -73,6 +78,7 @@ def prepare_eval_folder(path, configs, gpu=2, n_gpus=8, **kwargs):
     gpu_template = ','.join(['{}'] * gpu)
     gpus = [gpu_template.format(i, i + 1) for i in range(0, n_gpus, gpu)]
     bash_file = ['#!/bin/bash']
+    python_order = []
     for i in range(0, len(configs), n_gpus//gpu):
         for j in range(n_gpus//gpu):
             if i + j < len(configs):
@@ -82,12 +88,14 @@ def prepare_eval_folder(path, configs, gpu=2, n_gpus=8, **kwargs):
                 bash_file.append(bash_command_template(
                     gpus=gpus[j], subnet=job, save=os.path.join(
                         path, "net_{}_stats.txt".format(i + j)), **kwargs))
+                python_order.append(bash_file[-1])
         bash_file.append('wait')
 
     with open(os.path.join(path, 'run_bash.sh'), 'w') as handle:
         for line in bash_file:
             handle.write(line + os.linesep)
 
+    return python_order
 
 class MySampling(Sampling):
 

@@ -56,8 +56,8 @@ def get_net_info(net, x, args,  measure_latency=None, print_info=True, clean=Fal
 
     return {
         # 'params': np.round(net_info['params'] / 1e3, 2),
-        'params': net_info['params'],
-        'flops': net_info['flops'],
+        'params': net_info['params']/279862,
+        'flops': net_info['flops']/113016384,
         # 'flops': np.round(net_info['flops'] / 1e6, 2),
         'gpu': gpu_latency, 'cpu': cpu_latency
     }
@@ -69,9 +69,6 @@ def validate_config(config, max_depth=4):
     if isinstance(depth, str): depth = parse_string_list(depth)
 
     assert isinstance(depth, list)
-
-    # return {'ks': kernel_size, 'e': exp_ratio, 'd': depth, 'w': config['w']}
-    # return {'ks': kernel_size, 'e': exp_ratio, 'd': depth}
 
 
 class OFAEvaluator:
