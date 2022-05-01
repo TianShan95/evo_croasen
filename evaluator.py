@@ -204,6 +204,8 @@ def main(args):
             mode = 'config'
 
     print('Evaluation mode: {}'.format(mode))
+    print('Evaluation subnet: {}'.format(args.subnet))
+
     config = json.load(open(args.subnet))
     # if mode == 'config':
     #     net_config = json.load(open(args.config))
