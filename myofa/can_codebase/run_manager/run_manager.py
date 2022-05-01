@@ -449,7 +449,7 @@ class RunManager:
             labels = []
             preds = []
             acc = 0
-        with torch.autograd.set_detect_anomaly(True):
+        # with torch.autograd.set_detect_anomaly(True):
             for batch_idx, data in enumerate(self.run_config.train_loader):
 
                 data_time.update(time.time() - end)
