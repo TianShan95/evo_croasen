@@ -426,5 +426,13 @@ if __name__ == '__main__':
 
     cfgs.teacher_model = None
 
-    main(cfgs)
+    import re
+    result_log_file = re.findall(r'\/(.*)\/', cfgs.subnet)[0]+'_result.log'
+    try:
+        main(cfgs)
+        with open(result_log_file, 'a+') as f:
+            f.write(f'{cfgs.subnet} success!')
+    except Exception:
+        with open(result_log_file, 'a+') as f:
+            f.write(f'{cfgs.subnet} fail!')
 
