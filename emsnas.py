@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import shutil
 import argparse
 import subprocess
@@ -48,7 +49,7 @@ class EMsNAS:
         self.n_epochs = kwargs.pop('n_epochs', 5)  # number of epochs to SGD training
         self.test = kwargs.pop('test', False)  # evaluate performance on test set
         self.supernet_path = kwargs.pop(
-            'supernet_path', './data/ofa_mbv3_d234_e346_k357_w1.0')  # supernet model path
+            'supernet_path', '../experiment/evo_croasen/super_net/super_model_best.pth.tar')  # supernet model path
         self.latency = self.sec_obj if "cpu" in self.sec_obj or "gpu" in self.sec_obj else None
 
     def search(self):
@@ -157,6 +158,18 @@ class EMsNAS:
             n_epochs=self.n_epochs, test=self.test, latency=self.latency, verbose=False)
 
         subprocess.call("sh {}/run_bash.sh".format(gen_dir), shell=True)
+
+        results = []
+        # 运行结果排序
+        result_log = gen_dir + "iter_{}".format(it) + '_result.log'
+        with open(result_log, 'r') as f:
+            for line in f:
+                results.append(line.strip('\n'))
+        results = [x.strip() for x in results if x.strip() != '']
+        results.sort(key=lambda x: int(re.findall(r'net_(\d+)_subnet.txt', x)[0]))
+        with open(result_log, 'w') as f:
+            for i in results:
+                f.write(f'{i}\n')
 
         top1_err, complexity = [], []
 

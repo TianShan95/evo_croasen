@@ -426,13 +426,18 @@ if __name__ == '__main__':
 
     cfgs.teacher_model = None
 
+    # parser.add_argument('--subnet', type=str, default='.tmp/iter_0/net_1_subnet.txt',
+    #                     help='location of a json file of config eg: num of gcn')
+
     import re
-    result_log_file = re.findall(r'\/(.*)\/', cfgs.subnet)[0]+'_result.log'
+    import os
+    # .tmp/iter_0/iter_0_result.log
+    result_log_file = os.path.dirname(cfgs.subnet) + '/' + re.findall(r'\/(.*)\/', cfgs.subnet)[0]+'_result.log'
     try:
         main(cfgs)
         with open(result_log_file, 'a+') as f:
-            f.write(f'{cfgs.subnet} success!')
+            f.write(f'{cfgs.subnet} success!\n')
     except Exception:
         with open(result_log_file, 'a+') as f:
-            f.write(f'{cfgs.subnet} fail!')
+            f.write(f'{cfgs.subnet} fail!\n')
 
