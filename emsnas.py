@@ -161,7 +161,7 @@ class EMsNAS:
 
         results = []
         # 运行结果排序
-        result_log = gen_dir + "iter_{}".format(it) + '_result.log'
+        result_log = gen_dir + "/iter_{}".format(it) + '_result.log'
         with open(result_log, 'r') as f:
             for line in f:
                 results.append(line.strip('\n'))
