@@ -437,7 +437,8 @@ if __name__ == '__main__':
         main(cfgs)
         with open(result_log_file, 'a+') as f:
             f.write(f'{cfgs.subnet} success!\n')
+        print(f'{cfgs.subnet} success!\n')
     except Exception as e:
         with open(result_log_file, 'a+') as f:
             f.write(f'{cfgs.subnet} fail-{e}!\n')
-
+        print(f'{cfgs.subnet} fail-{e}!\n')
