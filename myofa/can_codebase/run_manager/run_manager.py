@@ -149,6 +149,7 @@ class RunManager:
         self.mix_prec = mix_prec
 
         self.best_acc = 0
+        self.best_acc_loss = 0  # 验证集最好的 acc 时的 loss
         self.start_epoch = 0
         self.args = args
 
@@ -535,6 +536,8 @@ class RunManager:
 
                 is_best = val_acc > self.best_acc
                 self.best_acc = max(self.best_acc, val_acc)
+                if is_best:
+                    self.best_acc_loss = val_loss
                 val_log = 'Valid [{0}/{1}]\tloss {2:.3f}\tacc {3:.3f} ({4:.3f})'. \
                     format(epoch + 1 , self.run_config.n_epochs, val_loss, val_acc, self.best_acc)
                 # val_log += '\ttop-5 acc {0:.3f}\tTrain top-1 {top1:.3f}\tloss {train_loss:.3f}\t'. \
@@ -552,6 +555,8 @@ class RunManager:
                 'state_dict': self.network.state_dict(),
             }, is_best=is_best)
             # break
+
+        return self.best_acc_loss, self.best_acc
 
     # def reset_running_statistics(self, net=None):
     #     from myofa.elastic_nn.utils import set_running_statistics

@@ -283,11 +283,7 @@ class DynamicLinearLayer(MyModule):
     def forward(self, x):
         if self.dropout is not None:
             x = self.dropout(x).clone()
-        # if self.act_func == 'tanh':
-        #     return self.act(self.linear(x)).unsqueeze_(-1)
-        # else:
-        # return self.act(self.linear(x).clone())
-        return self.linear(x, self.act)
+        return self.act(self.linear(x))
 
     @property
     def module_str(self):

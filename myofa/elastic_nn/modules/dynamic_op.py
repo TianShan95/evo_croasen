@@ -125,14 +125,14 @@ class DynamicLinear(nn.Module):
 
         self.active_out_features = self.max_out_features
 
-    def forward(self, x, act, out_features=None):
+    def forward(self, x, out_features=None):
         if out_features is None:
             out_features = self.active_out_features
         import copy
         in_features = x.size(1)
-        weight = self.linear.weight[:out_features, :in_features].clone()  #.contiguous()
-        bias = self.linear.bias[:out_features].clone() if self.bias else None
-        y = act(F.linear(x, weight, bias))
+        weight = self.linear.weight[:out_features, :in_features].contiguous()
+        bias = self.linear.bias[:out_features] if self.bias else None
+        y = F.linear(x, weight, bias)
         return y
 
 

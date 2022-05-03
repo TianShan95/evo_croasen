@@ -6,6 +6,8 @@ import json
 import torch
 import argparse
 import numpy as np
+import time
+import re
 
 import utils
 # from codebase.networks import NSGANetV2
@@ -42,10 +44,10 @@ def pad_none(x, depth, max_depth):
     return new_x
 
 
-def get_net_info(net, x, args,  measure_latency=None, print_info=True, clean=False, lut=None):
+def get_net_info(net, measure_latency=None, print_info=True, clean=False, lut=None):
 
     net_info = utils.get_net_info(
-        net, x, args, measure_latency, print_info=print_info, clean=clean, lut=lut)
+        net, measure_latency, print_info=print_info, clean=clean, lut=lut)
 
     gpu_latency, cpu_latency = None, None
     for k in net_info.keys():
@@ -155,7 +157,7 @@ class OFAEvaluator:
 
         # for batch_idx, data in enumerate(run_config.train_loader):
             # x = run_config.train_loader
-        info = get_net_info(subnet, run_config.data_provider.sample_trainx0, args, measure_latency=measure_latency,
+        info = get_net_info(subnet, measure_latency=measure_latency,
                             print_info=False, clean=True, lut=lut)
 
         # set the image size. You can set any image size from 192 to 256 here
@@ -174,19 +176,18 @@ class OFAEvaluator:
             # run_manager.reset_running_statistics(net=subnet)
 
         # if n_epochs > 0:
-        run_manager.train(cfgs, out_gcn_vector)
+        info['loss'], info['acc'] = run_manager.train(cfgs, out_gcn_vector)
 
-        loss, acc = run_manager.validate(net=run_manager.net, is_test=is_test, no_logs=no_logs, output_graph_vector=out_gcn_vector)
+        # loss, acc = run_manager.validate(net=run_manager.net, is_test=is_test, no_logs=no_logs, output_graph_vector=out_gcn_vector)
 
-        info['loss'], info['acc'] = loss, acc
+        # info['loss'], info['acc'] = loss, acc
 
-        save_path = os.path.join(log_dir, 'net_stats.txt') if cfgs.save is None else cfgs.save
+        save_path = os.path.join(log_dir, 'net_stats.txt') if cfgs.save is None else cfgs.save  # 保存结果
         if cfgs.save_config:
-            import re
             save_net_name = re.findall(r'\/(.*)\_subnet', args.subnet)[0].replace("/", "_")  # 'iter_0_net_0'
             OFAEvaluator.save_net_config(log_dir, subnet, "%s_config.txt" % save_net_name)
             OFAEvaluator.save_net(log_dir, subnet, "%s.init" % save_net_name)
-        with open(save_path, 'w') as handle:
+        with open(save_path, 'w') as handle:  # 保存实验结果
             json.dump(info, handle)
 
         print(info)
@@ -236,7 +237,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
                         help='location of the data corpus')
-    parser.add_argument('--log_dir', type=str, default='../experiment/evo_croasen/',
+    parser.add_argument('--log_dir', type=str, default='../experiment/evo_croasen',
                         help='directory for logging')
     parser.add_argument('--dataset', type=str, default='chc',
                         help='name of the dataset (car hack challenge Dataset...)')

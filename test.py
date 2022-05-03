@@ -165,37 +165,37 @@ import numpy as np
 # from ptflops import get_model_complexity_info
 #
 # class GraphConv(nn.Module):
-#     def __init__(self, input_dim, output_dim, add_self=False, normalize_embedding=False,
+#     def __init__( input_dim, output_dim, add_False, normalize_embedding=False,
 #                  dropout=0.0, bias=True, device='cpu'):
-#         super(GraphConv, self).__init__()
-#         self.add_self = add_self
-#         self.dropout = dropout
+#         super(GraphConv, .__init__()
+#         add_= add_self
+#         dropout = dropout
 #
 #         if dropout > 0.001:
-#             self.dropout_layer = nn.Dropout(p=dropout).to(device)
-#         self.normalize_embedding = normalize_embedding
-#         self.input_dim = input_dim
-#         self.output_dim = output_dim
-#         self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim)).to(device)
+#             dropout_layer = nn.Dropout(p=dropout).to(device)
+#         normalize_embedding = normalize_embedding
+#         input_dim = input_dim
+#         output_dim = output_dim
+#         weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim)).to(device)
 #         if bias:
-#             self.bias = nn.Parameter(torch.FloatTensor(output_dim)).to(device)
+#             bias = nn.Parameter(torch.FloatTensor(output_dim)).to(device)
 #         else:
-#             self.bias = None
+#             bias = None
 #
-#     def forward(self, x, adj):
-#         if self.dropout > 0.001:
-#             x = self.dropout_layer(x)
+#     def forward( x, adj):
+#         if dropout > 0.001:
+#             x = dropout_layer(x)
 #         y = torch.matmul(adj, x)
-#         if self.add_self:
+#         if add_
 #             y += x
 #
 #         # print('weight shape: ')
-#         # print(self.weight.shape)
-#         y = torch.matmul(y, self.weight)
+#         # print(weight.shape)
+#         y = torch.matmul(y, weight)
 #
-#         if self.bias is not None:
-#             y = y + self.bias
-#         if self.normalize_embedding:
+#         if bias is not None:
+#             y = y + bias
+#         if normalize_embedding:
 #             y = F.normalize(y, p=2, dim=2)
 #         return y
 #
@@ -261,14 +261,14 @@ import torch.nn.functional as F
 
 
 # class Net(nn.Module):
-#     def __init__(self, input_dim, output_dim):
+#     def __init__( input_dim, output_dim):
 #         super().__init__()
-#         self.input_dim = input_dim
-#         self.output_dim = output_dim
-#         self.linear = nn.Linear(input_dim, output_dim)
-#     def forward(self, x):
-#         weight = self.linear.weight[:2, :20]
-#         bias = self.linear.bias[:2]
+#         input_dim = input_dim
+#         output_dim = output_dim
+#         linear = nn.Linear(input_dim, output_dim)
+#     def forward( x):
+#         weight = linear.weight[:2, :20]
+#         bias = linear.bias[:2]
 #         return nn.Tanh()(F.linear(x, weight.clone(), bias.clone()))
 #
 # net = Net(50, 30)
@@ -294,6 +294,17 @@ import torch.nn.functional as F
 # img_list.sort(key = lambda x: int(x))
 # print(img_list)
 
-import subprocess
-print('test.py')
-subprocess.call('python test1.py', shell=True)
+# import subprocess
+# print('test.py')
+# subprocess.call('python test1.py & wait', shell=True)
+# import re
+# save_net_name = re.findall(r'\/(.*)\_subnet', '')[0]
+n_var = 19
+xu = np.ones(n_var)
+xu[2:6] = 2
+xu[6] = 5
+xu[7:9] = 3
+xu[9:11] = 2
+xu[11:17] = 4
+xu[17:] =2
+print(xu)

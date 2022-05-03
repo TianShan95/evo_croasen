@@ -127,23 +127,23 @@ class OFASearchSpace:
         # encode config ({'ks': , 'd': , etc}) to integer bit-string [1, 0, 2, 1, ...]
         x = []
         # 是否为有向图
-        direction = [np.argwhere(config['di'] == np.array(self.direction))]
+        direction = np.argwhere(config['di'] == np.array(self.direction)).tolist()[0]  # 0
         # 是否为图坍缩是使用正则化
-        norm = [np.argwhere(config['norm'] == np.array(self.norm))]
+        norm = np.argwhere(config['norm'] == np.array(self.norm)).tolist()[0]  # 1
         # 两个图卷积块的卷积层数
-        depth = [np.argwhere(_x == np.array(self.depth))[0, 0] for _x in config['d']]
+        depth = [np.argwhere(_x == np.array(self.depth))[0, 0] for _x in config['d']]  # 2, 3
         # 预测层 width rate
-        widthrate = [np.argwhere(_x == np.array(self.width_rate))[0, 0] for _x in config['wr']]
+        widthrate = [np.argwhere(_x == np.array(self.width_rate))[0, 0] for _x in config['wr']]  # 4, 5
         # 网络 dropout
-        dropout = [np.argwhere(config['drop'] == np.array(self.Dropout))]
+        dropout = np.argwhere(config['drop'] == np.array(self.Dropout)).tolist()[0]  # 6
         # 网络 wight decay
-        weightdecay = [np.argwhere(config['wd'] == np.array(self.Weightdecay))]
+        weightdecay = np.argwhere(config['wd'] == np.array(self.Weightdecay)).tolist()[0]  # 7
         # 网络 learning rate
-        lr = [np.argwhere(config['lr'] == np.array(self.lr))]
+        lr = np.argwhere(config['lr'] == np.array(self.lr)).tolist()[0]  # 8
         # 每个图网络块内 每次卷积输出的特征向量的方式
-        ogv = [np.argwhere(_x == np.array(self.out_gcn_vector))[0, 0] for _x in config['ogv']]
+        ogv = [np.argwhere(_x == np.array(self.out_gcn_vector))[0, 0] for _x in config['ogv']]  # 9, 10
         # 各个网络层的激活函数
-        act = [np.argwhere(_x == np.array(self.act))[0, 0] for _x in config['act']]
+        act = [np.argwhere(_x == np.array(self.act))[0, 0] for _x in config['act']]  # 11 - 18
 
         x += direction
         x += norm
@@ -163,9 +163,27 @@ class OFASearchSpace:
         assumes x = [block1, block2, ..., block5, resolution, width_mult];
         block_i = [depth, kernel_size, exp_rate]
         """
-        depth, kernel_size, exp_rate = [], [], []
-        for i in range(0, len(x) - 2, 9):
-            depth.append(self.depth[x[i]])
-            kernel_size.extend(np.array(self.kernel_size)[x[i + 1:i + 1 + self.depth[x[i]]]].tolist())
-            exp_rate.extend(np.array(self.exp_ratio)[x[i + 5:i + 5 + self.depth[x[i]]]].tolist())
-        return {'ks': kernel_size, 'e': exp_rate, 'd': depth, 'r': self.resolution[x[-1]]}
+        depth, width_rate, handle_gcn_vector, activation_all = [], [], [], []
+        # for i in range(0, len(x) - 2, 9):
+        #     depth.append(self.depth[x[i]])
+        #     kernel_size.extend(np.array(self.kernel_size)[x[i + 1:i + 1 + self.depth[x[i]]]].tolist())
+        #     exp_rate.extend(np.array(self.exp_ratio)[x[i + 5:i + 5 + self.depth[x[i]]]].tolist())
+        direction = self.direction[x[0]]  # 0
+        normalization = self.norm[x[1]]  # 1
+        for i in range(self.gcn_blocks):  # 2, 3
+            depth.append(self.depth[x[1+1+i]])
+        for i in range(self.linear_num):  # 4, 5
+            width_rate.append(self.width_rate[x[1+1+self.gcn_blocks+i]])
+        dropout = self.Dropout[x[1+1+self.gcn_blocks+self.linear_num]]  # 6
+        weight_decay = self.Weightdecay[x[1+1+self.gcn_blocks+self.linear_num+1]]  # 7
+        learning_rate = self.lr[x[1+1+self.gcn_blocks+self.linear_num+1+1]]  # 8
+        for i in range(self.gcn_blocks):  # 9, 10
+            handle_gcn_vector.append(self.out_gcn_vector[x[1+1+self.gcn_blocks+self.linear_num+1+1+1+i]])
+        for i in range(max(self.depth)*self.gcn_blocks):  # 11, 12, 13, 14, 15, 16
+            activation_all.append(self.act[x[2+self.gcn_blocks+self.linear_num+1+1+1+self.gcn_blocks+i]])
+        for i in range(self.linear_num):  # 17, 18
+            activation_all.append(self.linear_act[x[2+self.gcn_blocks+self.linear_num+3+self.gcn_blocks+max(self.depth)*self.gcn_blocks+i]])
+
+        return {'di': direction, 'norm': normalization, 'd': depth, 'wr': width_rate, 'drop': dropout,
+                'wd': weight_decay, 'lr': learning_rate, 'ogv': handle_gcn_vector, 'act': activation_all}
+

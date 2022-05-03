@@ -14,7 +14,7 @@ from pymoo.factory import get_performance_indicator
 from pymoo.algorithms.so_genetic_algorithm import GA
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from pymoo.factory import get_algorithm, get_crossover, get_mutation
-
+import time
 from search_space.myofa import OFASearchSpace
 from acc_predictor.factory import get_acc_predictor
 from utils import prepare_eval_folder, MySampling, BinaryCrossover, MyMutation
@@ -27,9 +27,12 @@ if _DEBUG: from pymoo.visualization.scatter import Scatter
 # Evolutionary Multi-Object Surrogate-Assisted
 # Neural Architecture Search
 class EMsNAS:
-    def __init__(self, kwargs):
+    def __init__(self, kwargs, args):
         self.search_space = OFASearchSpace()
         self.save_path = kwargs.pop('save', '.tmp')  # path to save results
+        self.args = args
+        self.log_dir = kwargs.pop('log_dir', '../experiment/evo_croasen')
+        self.localtime = time.strftime("_%Y%m%d_%H%M%S/", time.localtime())
         self.resume = kwargs.pop('resume', None)  # resume search from a checkpoint
         self.sec_obj = kwargs.pop('sec_obj', 'params')  # second objective to optimize simultaneously
         self.iterations = kwargs.pop('iterations', 30)  # number of iterations to run search 搜索的 代数
@@ -152,8 +155,8 @@ class EMsNAS:
         gen_dir = os.path.join(self.save_path, "iter_{}".format(it))
         python_order = prepare_eval_folder(
             gen_dir, archs, self.gpu, self.n_gpus, data=self.data, dataset=self.dataset,
-            n_classes=self.n_classes, supernet_path=self.supernet_path,
-            num_workers=self.n_workers, valid_size=self.vld_size,
+            n_classes=self.n_classes, supernet_path=self.supernet_path, log_dir=self.log_dir,
+            num_workers=self.n_workers, valid_size=self.vld_size, localtime=self.localtime,
             trn_batch_size=self.trn_batch_size, vld_batch_size=self.vld_batch_size,
             n_epochs=self.n_epochs, test=self.test, latency=self.latency, verbose=False)
 
@@ -170,7 +173,7 @@ class EMsNAS:
                 run_times = 0
                 while True:
                     # subprocess.call('ls', shell=True)
-                    subprocess.call(python_order[i], shell=True)
+                    subprocess.call(python_order[i] + ' wait', shell=True)
                     try:
                         stats = json.load(open(os.path.join(gen_dir, "net_{}_stats.txt".format(i))))
                         break
@@ -205,7 +208,7 @@ class EMsNAS:
     def _fit_acc_predictor(self, archive):
         inputs = np.array([self.search_space.encode(x[0]) for x in archive])  # arch samples
         targets = np.array([x[1] for x in archive])  # acc
-        assert len(inputs) > len(inputs[0]), "# of training samples have to be > # of dimensions"
+        # assert len(inputs) > len(inputs[0]), "# of training samples have to be > # of dimensions"
 
         acc_predictor = get_acc_predictor(self.predictor, inputs, targets)  # input是模型 targets是top-1错误率
 
@@ -224,7 +227,7 @@ class EMsNAS:
         # initialize the candidate finding optimization problem
         problem = AuxiliarySingleLevelProblem(
             self.search_space, predictor, self.sec_obj,
-            {'n_classes': self.n_classes, 'model_path': self.supernet_path})
+            {'n_classes': self.n_classes, 'model_path': self.supernet_path, 'args': self.args})
 
         # initiate a multi-objective solver to optimize the problem
         method = get_algorithm(
@@ -281,19 +284,25 @@ class AuxiliarySingleLevelProblem(Problem):
     """ The optimization problem for finding the next N candidate architectures """
 
     def __init__(self, search_space, predictor, sec_obj='flops', supernet=None):
-        super().__init__(n_var=46, n_obj=2, n_constr=0, type_var=np.int)
+        super().__init__(n_var=19, n_obj=2, n_constr=0, type_var=np.int)
 
         self.ss = search_space
         self.predictor = predictor
         self.xl = np.zeros(self.n_var)
-        self.xu = 2 * np.ones(self.n_var)
-        self.xu[-1] = int(len(self.ss.resolution) - 1)
+        self.xu = np.ones(self.n_var)
+        self.xu[2:6] = 2
+        self.xu[6] = 5
+        self.xu[7:9] = 3
+        self.xu[9:11] = 2
+        self.xu[11:17] = 4
+        self.xu[17:] =2
+        # self.xu[-1] = int(len(self.ss.linear_act) - 1)
         self.sec_obj = sec_obj
         self.lut = {'cpu': 'data/i7-8700K_lut.yaml'}
 
         # supernet engine for measuring complexity
         self.engine = OFAEvaluator(
-            n_classes=supernet['n_classes'], model_path=supernet['model_path'])
+            n_classes=supernet['n_classes'], model_path=supernet['model_path'], args=supernet['args'])
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = np.full((x.shape[0], self.n_obj), np.nan)
@@ -302,9 +311,12 @@ class AuxiliarySingleLevelProblem(Problem):
 
         for i, (_x, err) in enumerate(zip(x, top1_err)):
             config = self.ss.decode(_x)
-            subnet, _ = self.engine.sample({'ks': config['ks'], 'e': config['e'], 'd': config['d']})
-            info = get_net_info(subnet, (3, config['r'], config['r']),
-                                measure_latency=self.sec_obj, print_info=False, clean=True, lut=self.lut)
+            subnet, _ = self.engine.sample({'di': config['di'], 'norm': config['norm'],
+                                            'wr': config['wr'], 'drop': config['drop'],
+                                            'd': config['d'], 'act': config['act'], 'ogv': config['ogv']})
+            # info = get_net_info(subnet, (3, config['r'], config['r']),
+            #                     measure_latency=self.sec_obj, print_info=False, clean=True, lut=self.lut)
+            info = get_net_info(subnet, measure_latency=self.sec_obj, print_info=False, clean=True, lut=self.lut)
             f[i, 0] = err
             f[i, 1] = info[self.sec_obj]
 
@@ -337,7 +349,7 @@ class SubsetProblem(Problem):
 
 
 def main(args):
-    engine = EMsNAS(vars(args))
+    engine = EMsNAS(vars(args), args)
     engine.search()
     return
 
@@ -352,11 +364,11 @@ if __name__ == '__main__':
                         help='second objective to optimize simultaneously')
     parser.add_argument('--iterations', type=int, default=30,
                         help='number of search iterations')
-    parser.add_argument('--n_doe', type=int, default=128,
+    parser.add_argument('--n_doe', type=int, default=8,
                         help='initial sample size for DOE')
     parser.add_argument('--n_iter', type=int, default=8,
                         help='number of architectures to high-fidelity eval (low level) in each iteration')
-    parser.add_argument('--predictor', type=str, default='rbf',
+    parser.add_argument('--predictor', type=str, default='mlp',
                         help='which accuracy predictor model to fit (rbf/gp/cart/mlp/as)')
     parser.add_argument('--n_gpus', type=int, default=8,
                         help='total number of available gpus')
@@ -378,7 +390,7 @@ if __name__ == '__main__':
                         help='train batch size for training')
     parser.add_argument('--vld_batch_size', type=int, default=200,
                         help='test batch size for inference')
-    parser.add_argument('--n_epochs', type=int, default=50,
+    parser.add_argument('--n_epochs', type=int, default=3,
                         help='number of epochs for CNN training')
     parser.add_argument('--test', action='store_true', default=False,
                         help='evaluation performance on testing set')

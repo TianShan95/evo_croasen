@@ -5,7 +5,8 @@ import yaml
 import numpy as np
 from collections import OrderedDict
 from torchprofile import profile_macs
-
+import time
+import re
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -35,6 +36,7 @@ def bash_command_template(**kwargs):
     gpus = kwargs.pop('gpus', DEFAULT_CFG['gpus'])
     cfg = OrderedDict()
     cfg['subnet'] = kwargs['subnet']
+    cfg['localtime'] = kwargs['localtime']
     # cfg['data'] = kwargs['data']
     # cfg['dataset'] = kwargs['dataset']
     # cfg['n_classes'] = kwargs['n_classes']
@@ -42,6 +44,10 @@ def bash_command_template(**kwargs):
     # cfg['config'] = kwargs.pop('config', DEFAULT_CFG['config'])
     # cfg['init'] = kwargs.pop('init', DEFAULT_CFG['init'])
     cfg['save'] = kwargs.pop('save', DEFAULT_CFG['save'])
+    cfg['log_dir'] = kwargs['log_dir']
+    # log 存储路径
+    cfg['log_dir'] += cfg['localtime'] + re.findall(r'\/(.*)\_subnet', cfg['subnet'])[0] + '/'
+    del cfg['localtime']
     # cfg['trn_batch_size'] = kwargs.pop('trn_batch_size', DEFAULT_CFG['trn_batch_size'])
     # cfg['vld_batch_size'] = kwargs.pop('vld_batch_size', DEFAULT_CFG['vld_batch_size'])
     # cfg['num_workers'] = kwargs.pop('num_workers', DEFAULT_CFG['num_workers'])
@@ -255,7 +261,7 @@ def look_up_latency(net, lut, resolution=224):
     return predicted_latency
 
 
-def get_net_info(net, x, args, measure_latency=None, print_info=True, clean=False, lut=None):
+def get_net_info(net, measure_latency=None, print_info=True, clean=False, lut=None):
     """
     Modified from https://github.com/mit-han-lab/once-for-all/blob/
     35ddcb9ca30905829480770a6a282d49685aa282/ofa/imagenet_codebase/utils/pytorch_utils.py#L139
