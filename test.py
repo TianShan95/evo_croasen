@@ -299,12 +299,16 @@ import torch.nn.functional as F
 # subprocess.call('python test1.py & wait', shell=True)
 # import re
 # save_net_name = re.findall(r'\/(.*)\_subnet', '')[0]
-n_var = 19
-xu = np.ones(n_var)
-xu[2:6] = 2
-xu[6] = 5
-xu[7:9] = 3
-xu[9:11] = 2
-xu[11:17] = 4
-xu[17:] =2
-print(xu)
+# n_var = 19
+# xu = np.ones(n_var)
+# xu[2:6] = 2
+# xu[6] = 5
+# xu[7:9] = 3
+# xu[9:11] = 2
+# xu[11:17] = 4
+# xu[17:] =2
+# print(xu)
+
+a = [1, 2, 3, 4, 5, 6, 7]
+print(a[:-2])
+print(a[-2:])

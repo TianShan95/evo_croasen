@@ -143,7 +143,10 @@ class OFASearchSpace:
         # 每个图网络块内 每次卷积输出的特征向量的方式
         ogv = [np.argwhere(_x == np.array(self.out_gcn_vector))[0, 0] for _x in config['ogv']]  # 9, 10
         # 各个网络层的激活函数
-        act = [np.argwhere(_x == np.array(self.act))[0, 0] for _x in config['act']]  # 11 - 18
+        act = [np.argwhere(_x == np.array(self.act))[0, 0] for _x in config['act'][:-2]]  # 11 - 17
+        # 预测层 的激活函数
+        linear_act = [np.argwhere(_x == np.array(self.linear_act))[0, 0] for _x in config['act'][-2:]]  # 18 - 19
+
 
         x += direction
         x += norm
@@ -154,6 +157,7 @@ class OFASearchSpace:
         x += lr
         x += ogv
         x += act
+        x += linear_act
 
         return x
 
@@ -186,4 +190,3 @@ class OFASearchSpace:
 
         return {'di': direction, 'norm': normalization, 'd': depth, 'wr': width_rate, 'drop': dropout,
                 'wd': weight_decay, 'lr': learning_rate, 'ogv': handle_gcn_vector, 'act': activation_all}
-
