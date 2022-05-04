@@ -51,7 +51,7 @@ class MLP:
 
 
 def train(net, x, y, trn_split=0.8, pretrained=None, device='cpu',
-          lr=8e-4, epochs=2000, verbose=False):
+          lr=8e-4, epochs=500, verbose=False):
 
     n_samples = x.shape[0]
     target = torch.zeros(n_samples, 1)

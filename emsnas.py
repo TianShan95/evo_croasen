@@ -212,6 +212,8 @@ class EMsNAS:
 
         acc_predictor = get_acc_predictor(self.predictor, inputs, targets)  # input是模型 targets是top-1错误率
 
+        # 保存预测模型的参数
+
         return acc_predictor, acc_predictor.predict(inputs)  # 返回精度预测器 和 预测器预测出来的精度值
 
     def _next(self, archive, predictor, K):
