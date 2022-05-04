@@ -108,6 +108,7 @@
 # net.add_module('2', module1)
 # print(module1)
 # print(net)
+import os
 import time
 
 import numpy as np
@@ -309,6 +310,9 @@ import torch.nn.functional as F
 # xu[17:] =2
 # print(xu)
 
-a = [1, 2, 3, 4, 5, 6, 7]
-print(a[:-2])
-print(a[-2:])
+# a = [1, 2, 3, 4, 5, 6, 7]
+# print(a[:-2])
+# print(a[-2:])
+
+a = '/tmp/a.txt'
+print(os.path.basename(a))
