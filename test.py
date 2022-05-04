@@ -314,5 +314,8 @@ import torch.nn.functional as F
 # print(a[:-2])
 # print(a[-2:])
 
-a = '/tmp/a.txt'
-print(os.path.basename(a))
+# a = '/tmp/a.txt'
+# print(os.path.basename(a))
+
+a = np.array([2, 3, 4])
+print(a*100)

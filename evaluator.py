@@ -410,7 +410,7 @@ if __name__ == '__main__':
                         num_epochs=100,
                         train_ratio=0.8,
                         test_ratio=0.1,
-                        num_workers=0,
+                        num_workers=4,
                         # input_dim=10,
                         hidden_dim=20,  # hidden dim
                         output_dim=20,  # embedding dim

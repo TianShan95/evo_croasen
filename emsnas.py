@@ -5,6 +5,8 @@ import shutil
 import argparse
 import subprocess
 import numpy as np
+import torch
+
 from utils import get_correlation
 from evaluator import OFAEvaluator, get_net_info
 
@@ -32,8 +34,9 @@ class EMsNAS:
         self.save_path = kwargs.pop('save', '.tmp')  # path to save results
         self.args = args
         self.log_dir = kwargs.pop('log_dir', '../experiment/evo_croasen')
+        self.pred_dir = kwargs.pop('pred_dir', 'predictor_dict.pth')
         self.localtime = time.strftime("_%Y%m%d_%H%M%S/", time.localtime())
-        self.resume = kwargs.pop('resume', None)  # resume search from a checkpoint
+        self.resume = kwargs.pop('resume', '.tmp/iter_0/')  # resume search from a checkpoint
         self.sec_obj = kwargs.pop('sec_obj', 'params')  # second objective to optimize simultaneously
         self.iterations = kwargs.pop('iterations', 30)  # number of iterations to run search 搜索的 代数
         self.n_doe = kwargs.pop('n_doe',
@@ -84,7 +87,7 @@ class EMsNAS:
 
             # construct accuracy predictor surrogate model from archive
             # Algo 1 line 9 / Fig. 3(a) in the paper
-            acc_predictor, a_top1_err_pred = self._fit_acc_predictor(archive)  # 代理预测精度 top1误差预测
+            acc_predictor, a_top1_err_pred = self._fit_acc_predictor(archive, self.pred_dir)  # 代理预测精度 top1误差预测
 
             # search for the next set of candidates for high-fidelity evaluation (lower level)
             # Algo 1 line 10-11 / Fig. 3(b)-(d) in the paper
@@ -141,13 +144,16 @@ class EMsNAS:
     def _resume_from_dir(self):
         """ resume search from a previous iteration """
         import glob
-
+        print(f'resume from {self.resume}')
         archive = []
-        for file in glob.glob(os.path.join(self.resume, "net_*.subnet")):
+        for file in glob.glob(os.path.join(self.resume, "net_*_subnet.txt")):
             arch = json.load(open(file))
-            pre, ext = os.path.splitext(file)
-            stats = json.load(open(pre + ".stats"))
-            archive.append((arch, 100 - stats['top1'], stats[self.sec_obj]))
+            try:
+                stats = json.load(open(file.replace('subnet', 'stats')))
+            except FileNotFoundError:
+                continue
+
+            archive.append((arch, 100 - stats['acc'] * 100))
 
         return archive
 
@@ -205,14 +211,15 @@ class EMsNAS:
 
         return top1_err, complexity
 
-    def _fit_acc_predictor(self, archive):
+    def _fit_acc_predictor(self, archive, pred_dir):
         inputs = np.array([self.search_space.encode(x[0]) for x in archive])  # arch samples
         targets = np.array([x[1] for x in archive])  # acc
         # assert len(inputs) > len(inputs[0]), "# of training samples have to be > # of dimensions"
 
-        acc_predictor = get_acc_predictor(self.predictor, inputs, targets)  # input是模型 targets是top-1错误率
+        acc_predictor = get_acc_predictor(self.predictor, inputs, targets*100, pred_dir)  # input是模型 targets是top-1错误率
 
         # 保存预测模型的参数
+        torch.save(acc_predictor.model.state_dict(), pred_dir)
 
         return acc_predictor, acc_predictor.predict(inputs)  # 返回精度预测器 和 预测器预测出来的精度值
 
@@ -360,13 +367,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--save', type=str, default='.tmp',
                         help='location of dir to save')
-    parser.add_argument('--resume', type=str, default=None,
-                        help='resume search from a checkpoint')
+    # parser.add_argument('--resume', type=str, default=None,
+    #                     help='resume search from a checkpoint')
     parser.add_argument('--sec_obj', type=str, default='flops',
                         help='second objective to optimize simultaneously')
     parser.add_argument('--iterations', type=int, default=30,
                         help='number of search iterations')
-    parser.add_argument('--n_doe', type=int, default=8,
+    parser.add_argument('--n_doe', type=int, default=60,
                         help='initial sample size for DOE')
     parser.add_argument('--n_iter', type=int, default=8,
                         help='number of architectures to high-fidelity eval (low level) in each iteration')
@@ -392,7 +399,7 @@ if __name__ == '__main__':
                         help='train batch size for training')
     parser.add_argument('--vld_batch_size', type=int, default=200,
                         help='test batch size for inference')
-    parser.add_argument('--n_epochs', type=int, default=3,
+    parser.add_argument('--n_epochs', type=int, default=20,
                         help='number of epochs for CNN training')
     parser.add_argument('--test', action='store_true', default=False,
                         help='evaluation performance on testing set')

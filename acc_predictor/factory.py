@@ -1,4 +1,4 @@
-def get_acc_predictor(model, inputs, targets):
+def get_acc_predictor(model, inputs, targets, pred_dir):
 
     if model == 'rbf':
         from acc_predictor.rbf import RBF
@@ -18,7 +18,7 @@ def get_acc_predictor(model, inputs, targets):
     elif model == 'mlp':
         from acc_predictor.mlp import MLP
         acc_predictor = MLP(n_feature=inputs.shape[1])
-        acc_predictor.fit(x=inputs, y=targets)
+        acc_predictor.fit(x=inputs, y=targets, pretrained=pred_dir)
 
     elif model == 'as':
         from acc_predictor.adaptive_switching import AdaptiveSwitching
