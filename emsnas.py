@@ -153,7 +153,7 @@ class EMsNAS:
             except FileNotFoundError:
                 continue
 
-            archive.append((arch, 100 - stats['acc'] * 100))
+            archive.append((arch, 1 - stats['acc'], stats['flops']))
 
         return archive
 
