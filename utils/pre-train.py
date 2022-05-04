@@ -29,9 +29,14 @@ def _resume_from_dir(resume):
     archive = []
     for file in glob.glob(os.path.join(resume, "net_*_subnet.txt")):
         arch = json.load(open(file))
-        pre, ext = os.path.splitext(file)
-        stats = json.load(open(pre + ".stats"))
-        archive.append((arch, 100 - stats['top1']))
+        # pre, ext = os.path.splitext(file)
+        # stats = json.load(open(pre + ".txt"))
+        try:
+            stats = json.load(open(file.replace('subnet', 'stats')))
+        except FileNotFoundError:
+            continue
+
+        archive.append((arch, 100 - stats['acc']*100))
 
     return archive
 
