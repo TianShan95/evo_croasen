@@ -11,7 +11,7 @@ import re
 
 import utils
 # from codebase.networks import NSGANetV2
-from codebase.run_manager import get_run_config
+from myofa.can_codebase.run_manager import get_run_config
 # from ofa.elastic_nn.networks import OFAMobileNetV3
 from myofa.can_codebase.run_manager import RunManager
 # from ofa.elastic_nn.modules.dynamic_op import DynamicSeparableConv2d
@@ -176,7 +176,7 @@ class OFAEvaluator:
             # run_manager.reset_running_statistics(net=subnet)
 
         # if n_epochs > 0:
-        info['loss'], info['acc'] = run_manager.train(cfgs, out_gcn_vector)
+        info['loss'], info['acc'] = run_manager.train(cfgs)
 
         # loss, acc = run_manager.validate(net=run_manager.net, is_test=is_test, no_logs=no_logs, output_graph_vector=out_gcn_vector)
 

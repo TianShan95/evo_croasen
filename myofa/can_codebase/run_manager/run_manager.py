@@ -278,7 +278,7 @@ class RunManager:
 
         if is_best:
             best_path = os.path.join(self.save_path, 'model_best.pth.tar')
-            torch.save({'state_dict': checkpoint['state_dict']}, best_path)
+            torch.save({'model': checkpoint['model'], 'state_dict': checkpoint['state_dict']}, best_path)
 
     def load_model(self, model_fname=None):
         latest_fname = os.path.join(self.save_path, 'latest.txt')
@@ -327,7 +327,7 @@ class RunManager:
 
     """ train and test """
 
-    def validate(self, epoch=0, output_graph_vector=None, is_test=True, run_str='', net=None, data_loader=None, no_logs=False):
+    def validate(self, epoch=0, is_test=True, run_str='', net=None, data_loader=None, no_logs=False):
         if net is None:
             net = self.net
         # if not isinstance(net, nn.DataParallel):
@@ -400,7 +400,7 @@ class RunManager:
 
                         pool_matrices_dic[ind] = pool_matrices_list
 
-                    ypred, _ = net(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic, out_gcn_vector=output_graph_vector)
+                    ypred, _ = net(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic)
 
                     # else:
                     #     ypred = model(h0, adj, batch_num_nodes, assign_x=assign_input)
@@ -428,7 +428,7 @@ class RunManager:
 
         return losses.avg, acc
 
-    def train_one_epoch(self, args, epoch, mask_nodes=True, output_graph_vector='sum'):
+    def train_one_epoch(self, args, epoch, mask_nodes=True):
         # switch to train mode
         self.net.train()
 
@@ -492,7 +492,7 @@ class RunManager:
 
                     pool_matrices_dic[ind] = pool_matrices_list
 
-                ypred, _ = self.net(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic, out_gcn_vector=output_graph_vector)
+                ypred, _ = self.net(h0, adj, adj_pooled_list, batch_num_nodes, batch_num_nodes_list, pool_matrices_dic)
                 _, indices = torch.max(ypred, 1)
                 preds.append(indices.cpu().data.numpy())
                 # else:
@@ -525,14 +525,14 @@ class RunManager:
 
         return graph_losses.avg, acc
 
-    def train(self, args, output_graph_vector):
+    def train(self, args):
         for epoch in range(self.start_epoch, self.run_config.n_epochs):
-            train_loss, acc = self.train_one_epoch(args, epoch, output_graph_vector=output_graph_vector)
+            train_loss, acc = self.train_one_epoch(args, epoch)
             train_log = 'Train [{0}/{1}]\tloss {2:.3f}\tacc {3:.3f} ({4:.3f})'. \
                 format(epoch + 1, self.run_config.n_epochs, train_loss, acc, self.best_acc)
             self.write_log(train_log, prefix='train', should_print=False)
             if (epoch + 1) % self.run_config.validation_frequency == 0:
-                val_loss, val_acc = self.validate(net=self.net, epoch=epoch, output_graph_vector=output_graph_vector, is_test=False)
+                val_loss, val_acc = self.validate(net=self.net, epoch=epoch, is_test=False)
 
                 is_best = val_acc > self.best_acc
                 self.best_acc = max(self.best_acc, val_acc)
@@ -553,6 +553,7 @@ class RunManager:
                 'best_acc': self.best_acc,
                 'optimizer': self.optimizer.state_dict(),
                 'state_dict': self.network.state_dict(),
+                'model': self.network
             }, is_best=is_best)
             # break
 

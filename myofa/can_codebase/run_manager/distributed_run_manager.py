@@ -16,7 +16,6 @@ import torch.backends.cudnn as cudnn
 
 import horovod.torch as hvd
 
-# from imagenet_codebase.utils import *
 from ofa.imagenet_codebase.utils import get_net_info, cross_entropy_with_label_smoothing, \
     cross_entropy_loss_with_soft_target, DistributedMetric, list_mean
 from ofa.imagenet_codebase.run_manager import RunConfig

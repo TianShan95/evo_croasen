@@ -367,16 +367,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--save', type=str, default='.tmp',
                         help='location of dir to save')
-    # parser.add_argument('--resume', type=str, default=None,
-    #                     help='resume search from a checkpoint')
+    parser.add_argument('--resume', type=str, default='.tmp/iter_0/',
+                        help='resume search from a checkpoint')
     parser.add_argument('--sec_obj', type=str, default='flops',
                         help='second objective to optimize simultaneously')
     parser.add_argument('--iterations', type=int, default=30,
-                        help='number of search iterations')
+                        help='number of search iterations')  # 搜索的代数
     parser.add_argument('--n_doe', type=int, default=60,
-                        help='initial sample size for DOE')
+                        help='initial sample size for DOE')  # 最初代的个体数
     parser.add_argument('--n_iter', type=int, default=8,
-                        help='number of architectures to high-fidelity eval (low level) in each iteration')
+                        help='number of architectures to high-fidelity eval (low level) in each iteration')  # 每代选出评估的个体数
     parser.add_argument('--predictor', type=str, default='mlp',
                         help='which accuracy predictor model to fit (rbf/gp/cart/mlp/as)')
     parser.add_argument('--n_gpus', type=int, default=8,
@@ -400,7 +400,7 @@ if __name__ == '__main__':
     parser.add_argument('--vld_batch_size', type=int, default=200,
                         help='test batch size for inference')
     parser.add_argument('--n_epochs', type=int, default=20,
-                        help='number of epochs for CNN training')
+                        help='number of epochs for CNN training')  # 对个体评估时 训练的代数
     parser.add_argument('--test', action='store_true', default=False,
                         help='evaluation performance on testing set')
 
