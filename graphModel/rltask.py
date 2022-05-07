@@ -57,7 +57,7 @@ class Task:
         #                                                 concat=args.concat, bn=args.bn,
         #                                                 dropout=args.dropout, mask=args.mask, args=args, device=device)
 
-        logger.info(self.model['model'])
+        logger.info(self.model)
         # 定义优化器
         # self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.model['model'].parameters()), lr=args.graph_lr,
         #                                   weight_decay=args.weight_decay)
