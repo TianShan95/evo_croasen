@@ -45,7 +45,7 @@ class Task:
 
         # 模型加载 参数
         self.model = graph_model_data['model']
-        self.model.load_state_dict(self.model['state_dict'])
+        self.model.load_state_dict(graph_model_data['state_dict'])
         # else:
         #     logger.info('============= 图模型从头训练 =================')
         #     pool_sizes = [int(i) for i in args.pool_sizes.split('_')]
