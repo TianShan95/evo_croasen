@@ -36,15 +36,16 @@ class Task:
 
         # if args.graph_model_path:
         if device == 'cpu':
-            self.model = torch.load(args.graph_model_path,
+            graph_model_data = torch.load(args.graph_model_path,
                                     map_location=torch.device('cpu'))  # 模型 变量 会在 benchmark_task_val 首次调用时定义
-            # 模型加载 参数
-            self.model['model'].load_state_dict(self.model['state_dict'])
+
 
         elif device == 'cuda':
-            self.model = torch.load(args.graph_model_path)  # 模型 变量 会在 benchmark_task_val 首次调用时定义
-            # 模型加载参数
-            self.model['model'].load_state_dict(self.model['state_dict'])
+            graph_model_data = torch.load(args.graph_model_path)  # 模型 变量 会在 benchmark_task_val 首次调用时定义
+
+        # 模型加载 参数
+        self.model = graph_model_data['model']
+        self.model.load_state_dict(self.model['state_dict'])
         # else:
         #     logger.info('============= 图模型从头训练 =================')
         #     pool_sizes = [int(i) for i in args.pool_sizes.split('_')]
@@ -106,7 +107,7 @@ class Task:
                 # # 在进行表示学习时 不进行模型更新
                 val_data = prepare_data(sample_graphs, coarsen_graphs, self.args,
                                         max_nodes=self.args.max_nodes)  # 生成验证数据
-                after_gcn_vector, reward, label, pred, graph_loss = evaluate(val_data, self.model['model'], self.args,
+                after_gcn_vector, reward, label, pred, graph_loss = evaluate(val_data, self.model, self.args,
                                                                              device=self.device)
             else:
                 # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
@@ -115,7 +116,7 @@ class Task:
                                           max_nodes=self.args.max_nodes)  # 生成训练数据
                 # after_gcn_vector, reward, label, pred, graph_loss = train(train_data, self.model['model'], self.args,
                 #                                                           self.optimizer, device=self.device)
-                after_gcn_vector, reward, label, pred, graph_loss = evaluate(train_data, self.model['model'], self.args,
+                after_gcn_vector, reward, label, pred, graph_loss = evaluate(train_data, self.model, self.args,
                                                                              device=self.device)
 
         return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss

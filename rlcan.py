@@ -416,10 +416,10 @@ def main(prog_args):
                 # 保存强化学习模型
                 agent.save(i, str('%.4f' % val_acc), log_out_dir)
                 # 保存图模型
-                graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph_model.pth'
-                graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_para.pth'
-                torch.save(graph_task.model, graph_model_path)
-                torch.save(graph_task.model.state_dict(), graph_model_para_path)
+                # graph_model_path = log_out_dir + 'epoch_' + str(i) + '_graph.pth.tar'
+                # graph_model_para_path = log_out_dir + 'epoch_' + str(i) + '_graph_para.pth'
+                # torch.save({'model' : graph_task.model, 'state_dict': graph_task.model.state_dict()}, graph_model_path)
+                # torch.save(graph_task.model.state_dict(), graph_model_para_path)
 
             # # 结束一次 epoch 发送一次邮件 防止 colab 突然停止
             # content = f'{time.strftime("%Y%m%d_%H%M%S", time.localtime())} END\n' \
