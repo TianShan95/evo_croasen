@@ -317,5 +317,33 @@ import torch.nn.functional as F
 # a = '/tmp/a.txt'
 # print(os.path.basename(a))
 
-a = np.array([2, 3, 4])
-print(a*100)
+# a = np.array([2, 3, 4])
+# print(a*100)
+
+# import re
+# can_conv_net_dir = '../../experiment/evo_can_conv/p0_20220509_143247/00000_pkl_offspring/00_[0, 0, 2, 1, 1, 1, 0, 4]_offspring.pkl'
+# gene_list_str = re.findall(r'\[(.*)\]', can_conv_net_dir)[0]
+# gene_list = list(map(int, gene_list_str.split(',')))
+#
+# print(gene_list)
+# print(type(gene_list))
+
+# a = [21, 3, 5]
+# for i in a:
+#     print(int(i/2))
+# print((300-28)/29)
+# print((300-28)//29)
+# print((300-28)%29)
+
+a = [
+    [1, 2],
+    [3, 4]
+]
+b = torch.from_numpy(np.array(a))
+print(b)
+print(b[0][0])
+print(b[0][0]>b[0][1])
+if b[0][0]>b[0][1]:
+    print('ok')
+else:
+    print('ooook')

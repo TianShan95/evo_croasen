@@ -8,6 +8,7 @@ from myofa.can_codebase.data_providers.coarsen_pooling_with_last_eigen_padding i
 # import graphModel.gen.feat as featgen
 import numpy as np
 from graphModel.processData import originCanData
+from graphModel.processData import run_time_provide_dataset
 import torch
 import hiddenlayer as hl
 # import matplotlib.pyplot as plt
@@ -19,11 +20,12 @@ import json
 class Task:
     def __init__(self, args, device):
         self.origin_can_obj = originCanData.OriginCanData(args)
+        self.runtime_provide_graph_can = run_time_provide_dataset.OriginCanData(args)
         self.args = args
         self.pool_sizes = [int(i) for i in self.args.pool_sizes.split('_')]  # 池化时 每个簇的 子图大小
 
         # 确定 是否是有向图 和 坍缩时是否使用正则化
-        print(os.listdir('./.tmp/iter_30'))
+        # print(os.listdir('./.tmp/iter_30'))
         config = json.load(open(args.graph_cfg_file))
         self.graph_direction = config['di']
         self.croasen_norm = config['norm']
@@ -80,13 +82,18 @@ class Task:
             mode: train or test
             first: 是否第一次调用 第一次调用需要定义一次模型 之后再调用则不需要再次定义模型 模型变量 self.model
         '''
+        last_can_len = None
+        if self.args.mode == 'train':
+            sample_graphs, train_done, val_done, _ = self.origin_can_obj.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
+        else:  # test
+            sample_graphs, train_done, val_done, last_can_len = self.runtime_provide_graph_can.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
-        sample_graphs, train_done, val_done = self.origin_can_obj.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
         coarsen_graphs = []
         after_gcn_vector = None
         reward = 0
         label = None
         pred = None
+        graph_ypred = None
         graph_loss = 0
         # val_done 是最后的结束标志
         if not val_done:
@@ -107,7 +114,7 @@ class Task:
                 # # 在进行表示学习时 不进行模型更新
                 val_data = prepare_data(sample_graphs, coarsen_graphs, self.args,
                                         max_nodes=self.args.max_nodes)  # 生成验证数据
-                after_gcn_vector, reward, label, pred, graph_loss = evaluate(val_data, self.model, self.args,
+                after_gcn_vector, reward, label, pred, graph_loss, graph_ypred = evaluate(val_data, self.model, self.args,
                                                                              device=self.device)
             else:
                 # 送入模型 得到执行此动作(选出这些数量的报文)的 状态向量
@@ -116,7 +123,7 @@ class Task:
                                           max_nodes=self.args.max_nodes)  # 生成训练数据
                 # after_gcn_vector, reward, label, pred, graph_loss = train(train_data, self.model['model'], self.args,
                 #                                                           self.optimizer, device=self.device)
-                after_gcn_vector, reward, label, pred, graph_loss = evaluate(train_data, self.model, self.args,
+                after_gcn_vector, reward, label, pred, graph_loss, graph_ypred = evaluate(train_data, self.model, self.args,
                                                                              device=self.device)
 
-        return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss
+        return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss, graph_ypred, sample_graphs, last_can_len

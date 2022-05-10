@@ -128,7 +128,7 @@ class ChcRunConfig(RunConfig):
                 logger.info('生成固定图大小')
                 p = OnlyGraphData(args)
 
-            #
+            # 读取数据集文件 并转换为 图数据
             graphs = load_graph_origin_dataset_file.read_graphfile(p.output_name_suffix, direction,
                                               max_nodes=args.max_nodes)  # 从数据集得到图对象
             logger.info(f'Data length before filtering: {len(graphs)}')
