@@ -198,7 +198,7 @@ def main(prog_args):
                 for singleCan in range(prog_args.graph_batchsize):
                     agent.actor.eval()
                     action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                    logger.info(f'action-select: {torch.argmax(action)}')
+                    logger.info(f'action-select: {np.argmax(action)}')
 
                     # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
 
