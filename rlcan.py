@@ -195,10 +195,11 @@ def main(prog_args):
                 # 串行把 batchsize 大小的数据输入 强化学习 得到batchsize大小个 can 数据长度
                 len_can_list = []
                 actions = []
+                actual_select = []
                 for singleCan in range(prog_args.graph_batchsize):
                     agent.actor.eval()
                     action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                    logger.info(f'action-select: {np.argmax(action)}')
+                    actual_select.append(np.argmax(action) + prog_args.msg_smallest_num)
 
                     # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
 
@@ -327,6 +328,7 @@ def main(prog_args):
                                 f'reward: {reward:<8.3f}; '
                                 f'acc: {train_acc:<4.2f}; trainTimes: {train_times}; g_loss: {graph_loss:<8.6f}; '
                                 f'avg_Q1_loss: {avg_Q1_loss:.2f}; avg_Q2_loss: {avg_Q2_loss:.2f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'actual selec: {actual_select}')
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')
@@ -379,6 +381,7 @@ def main(prog_args):
                                 f'{graph_task.origin_can_obj.point}/{graph_task.origin_can_obj.data_val_len}; '
                                 f'reward: {reward:<8.3f}; '
                                 f'acc: {val_acc:<4.2f}; g_loss: {graph_loss:<8.6f}; ep_r: {ep_r:.2f}')
+                    logger.info(f'actual selec: {actual_select}')
                     logger.info(f'len_can_list: {len_can_list}')
                     logger.info(f'labe: {label}')
                     logger.info(f'pred: {pred}')

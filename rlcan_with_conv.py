@@ -705,6 +705,9 @@ if __name__ == '__main__':
                         help='dynamic or static', default=['D'])  # D or S 车辆动态报文 或者 车辆静止报文
     parser.add_argument('--csv_num', nargs='+', type=int,
                         help='csv num', default=[1, 2])  # 0 or 1 or 2  # csv文件标号
+    parser.add_argument('--data_PreMerge', dest='data_PreMerge', action='store_const',
+                        const=False, default=True,
+                        help='Whether to use submission')
     parser.add_argument('--msg_smallest_num', type=int,
                         help='the smallest num of msg of a graph', default=200)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
     parser.add_argument('--msg_biggest_num', type=int,
