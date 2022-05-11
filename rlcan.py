@@ -499,7 +499,7 @@ if __name__ == '__main__':
                         default='', type=str)
 
     parser.add_argument('--out_dir', type=str,
-                        help='out_dir', default='../experiment')  # 实验结果输出文件夹
+                        help='out_dir', default='../../experiment')  # 实验结果输出文件夹
 
     # optional parameters
     # parser.add_argument('--activation', default='Relu', type=str)
@@ -651,14 +651,14 @@ if __name__ == '__main__':
                         num_gc_layers=2,
                         # dropout=0.0,
                         bmname='Pre_train',
-                        origin_can_datadir='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
+                        origin_can_datadir='../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
 
                         # train_epoch = 20,
                         # graph_batchsize = 64,
                         epsilon=0.9,
                         msg_smallest_num=200,
                         msg_biggest_num=500,
-                        graph_model_path='../experiment/evo_croasen_20220504_143455/iter_30/net_3/checkpoint/model_best.pth.tar',
+                        graph_model_path='../../experiment/evo_croasen_20220504_143455/iter_30/net_3/checkpoint/model_best.pth.tar',
                         # graph_lr = 0.01,
                         # reforce_lr = 30,
                         )
