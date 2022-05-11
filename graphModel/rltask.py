@@ -84,7 +84,7 @@ class Task:
         '''
         last_can_len = None
         if self.args.mode == 'train':
-            sample_graphs, train_done, val_done, _ = self.origin_can_obj.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
+            sample_graphs, train_done, val_done = self.origin_can_obj.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
         else:  # test
             sample_graphs, train_done, val_done, last_can_len = self.runtime_provide_graph_can.get_ds_a(len_can_list, self.graph_direction)  # 取出 指定长度(此动作)的数据 并 转换为 图对象 输出是否完成信号
 
