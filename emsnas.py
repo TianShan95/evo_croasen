@@ -514,9 +514,9 @@ if __name__ == '__main__':
                         help='dynamic or static', default='Car_Hacking_Challenge_Dataset_rev20Mar2021')  # 0 or 1 or 2
 
     parser.add_argument('--msg_smallest_num', type=int,
-                        help='the smallest num of msg of a graph', default=50)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
+                        help='the smallest num of msg of a graph', default=200)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
     parser.add_argument('--msg_biggest_num', type=int,
-                        help='the biggest num of msg of a graph', default=300)  # 强化学习 每个步骤取一个图 构成这个图报文最大的条数
+                        help='the biggest num of msg of a graph', default=500)  # 强化学习 每个步骤取一个图 构成这个图报文最大的条数
 
     parser.add_argument('--Di_graph', type=int,
                         help='Whether is Di-graph', default=1)  # 是否是有向图 默认为有向图

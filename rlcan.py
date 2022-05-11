@@ -198,8 +198,8 @@ def main(prog_args):
                 for singleCan in range(prog_args.graph_batchsize):
                     agent.actor.eval()
                     action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
-                    # print('aaron55')
-                    #
+                    print(f'action-select: {torch.argmax(action)}')
+
                     # agent.writer.add_graph(Wrapper, [torch.unsqueeze(state[singleCan], dim=0), torch.unsqueeze(torch.from_numpy(action).to(device), dim=0)])
 
                     # action = action + np.random.normal(0, prog_args.exploration_noise, size=action.shape[0])
@@ -590,6 +590,9 @@ if __name__ == '__main__':
                         help='dynamic or static', default=['D'])  # D or S 车辆动态报文 或者 车辆静止报文
     parser.add_argument('--csv_num', nargs='+', type=int,
                         help='csv num', default=[1, 2])  # 0 or 1 or 2  # csv文件标号
+    parser.add_argument('--data_PreMerge', dest='data_PreMerge', action='store_const',
+                        const=False, default=True,
+                        help='Whether to use submission')
     parser.add_argument('--msg_smallest_num', type=int,
                         help='the smallest num of msg of a graph', default=200)  # 强化学习 每个步骤取一个图 构成这个图报文最小的条数
     parser.add_argument('--msg_biggest_num', type=int,

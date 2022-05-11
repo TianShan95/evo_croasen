@@ -335,15 +335,18 @@ import torch.nn.functional as F
 # print((300-28)//29)
 # print((300-28)%29)
 
-a = [
-    [1, 2],
-    [3, 4]
-]
-b = torch.from_numpy(np.array(a))
-print(b)
-print(b[0][0])
-print(b[0][0]>b[0][1])
-if b[0][0]>b[0][1]:
-    print('ok')
-else:
-    print('ooook')
+# a = [
+#     [1, 2],
+#     [3, 4]
+# ]
+# b = torch.from_numpy(np.array(a))
+# print(b)
+# print(b[0][0])
+# print(b[0][0]>b[0][1])
+# if b[0][0]>b[0][1]:
+#     print('ok')
+# else:
+#     print('ooook')
+import os
+a = '../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/'
+print(os.path.dirname(os.path.dirname(a)))

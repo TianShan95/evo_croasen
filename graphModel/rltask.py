@@ -126,4 +126,7 @@ class Task:
                 after_gcn_vector, reward, label, pred, graph_loss, graph_ypred = evaluate(train_data, self.model, self.args,
                                                                              device=self.device)
 
-        return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss, graph_ypred, sample_graphs, last_can_len
+        if self.args.mode == 'train':
+            return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss
+        else:
+            return after_gcn_vector, reward, train_done, val_done, label, pred, graph_loss, graph_ypred, sample_graphs, last_can_len

@@ -7,8 +7,8 @@ import torch.utils.data as Data
 class MyData:
     def __init__(self):
 
-        x = np.load("../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/Conv_CAN/D_1_2_sub/D_1_2_sub_feature_127466.npz",)['arr_0']
-        y = np.load("../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/Conv_CAN/D_1_2_sub/D_1_2_sub_label_127466.npz")['arr_0']
+        x = np.load("../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/Conv_CAN/D_1_2/D_1_2_feature_58475.npz",)['arr_0']
+        y = np.load("../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/Conv_CAN/D_1_2/D_1_2_label_58475.npz")['arr_0']
 
         train_size = int(len(x)*0.64)
         valid_size = int(len(x)*0.70)
