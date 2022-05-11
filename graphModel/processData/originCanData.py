@@ -28,7 +28,7 @@ class OriginCanData:
             csv_names.append(f'{os.path.dirname(os.path.dirname(args.origin_can_datadir))}/1_Submission/Pre_submit_D.csv')
         frames = list()
         for csv_file in csv_names:
-            logger.info(f'数据csv文件: {csv_file}')
+            print(f'数据csv文件: {csv_file}')
             frames.append(pd.read_csv(csv_file, usecols=col_name_list))  # 读取 can报文 csv源文件
         self.df = pd.concat(frames)  # 得到全部数据
 
