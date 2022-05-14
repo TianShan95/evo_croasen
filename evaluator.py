@@ -237,7 +237,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default='../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
                         help='location of the data corpus')
-    parser.add_argument('--log_dir', type=str, default='../../experiment/evo_croasen',
+    parser.add_argument('--log_dir', type=str, default='../../experiment/evo_croasen_20220514_100000/iter_30/net_3_di/',
                         help='directory for logging')
     parser.add_argument('--dataset', type=str, default='chc',
                         help='name of the dataset (car hack challenge Dataset...)')
@@ -245,7 +245,7 @@ if __name__ == '__main__':
                         help='number of classes for the given dataset normal or intrusion')
     parser.add_argument('--supernet_path', type=str, default='../../experiment/evo_croasen/super_net/super_model_best.pth.tar',
                         help='file path to supernet weights')
-    parser.add_argument('--subnet', type=str, default='.tmp/iter_0/net_1_subnet.txt',
+    parser.add_argument('--subnet', type=str, default='.tmp_test_di_nor/iter_30/net_3_subnet_di.txt',
                         help='location of a json file of config eg: num of gcn')
     parser.add_argument('--config', type=str, default=None,
                         help='location of a json file of specific model declaration')
@@ -259,7 +259,7 @@ if __name__ == '__main__':
     #                     help='number of workers for data loading')
     parser.add_argument('--n_epochs', type=int, default=30,
                         help='number of training epochs')
-    parser.add_argument('--save', type=str, default=None,
+    parser.add_argument('--save', type=str, default='.tmp_test_di_nor/iter_30/net_3_stats_di.txt',
                         help='location to save the evaluated metrics')
     # parser.add_argument('--resolution', type=int, default=224,
     #                     help='input resolution (192 -> 256)')
@@ -439,4 +439,4 @@ if __name__ == '__main__':
     except Exception as e:
         with open(result_log_file, 'a+') as f:
             f.write(f'{cfgs.subnet} fail-{e}!\n')
-        print(f'{cfgs.subnet} fail-{e}!\n')
+        print(f'{cfgs.subnet} fail: {e}!\n')
