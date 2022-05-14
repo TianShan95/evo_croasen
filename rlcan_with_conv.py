@@ -146,7 +146,7 @@ def main(prog_args):
 
         state, _, _, _, _, _, _, _, _, _ = graph_task.benchmark_task_val(prog_args.feat, graph_len_list)
         conv_start_sample = 0
-        last_sample_frame = 0
+        last_sample_frame = conv_frame_num
         point = 0
         count_same = 0
         count_graph = 0
@@ -157,6 +157,7 @@ def main(prog_args):
         pred_conv_error = 0
         pred_same_correct = 0
         pred_same_error = 0
+        graph_handled_frame = 0  # 图网络已经处理的can报文的帧数
 
 
         while True:
@@ -172,7 +173,7 @@ def main(prog_args):
             # state = next_state
 
             len_can_list = []
-            sample_num_per_lencan = []
+            conv_sample_num_per_lenpackage = []
             for singleCan in range(prog_args.graph_batchsize):
                 agent.actor.eval()
                 action = agent.select_action(state[singleCan], p=True)  # 从 现在的 状态 得到一个动作 报文长度可选择数量
@@ -182,7 +183,7 @@ def main(prog_args):
                 len_can_list.append(len_can)
 
                 # 得出每个数据包 卷积网络需要采集的样本数
-                sample_num_per_lencan.append((len_can-(conv_frame_num - last_sample_frame))//conv_frame_num + conv_start_sample)
+                conv_sample_num_per_lenpackage.append((len_can-(conv_frame_num - last_sample_frame))//conv_frame_num + conv_start_sample)
                 conv_start_sample = 1
                 last_sample_frame = (len_can-(conv_frame_num - last_sample_frame)) % conv_frame_num
 
@@ -204,19 +205,22 @@ def main(prog_args):
                 print(f'total error: {pred_same_error + pred_graph_error + pred_conv_error}')
 
                 # 打印出 graph 未用到的数据长度
+                print(len_can_list)
+                print(len(sample_graphs_list))
+                print(last_canlen)
                 print(f'graph_data remaining: {sum(len_can_list[:len(sample_graphs_list)])+last_canlen}')
                 # 打印出 卷积数据集还剩的数据长度
                 print(f'conv_data remaining: {len(conv_x[point:])*conv_frame_num}')
                 break
 
-            for sample_num, sample_graph_len in enumerate(sample_num_per_lencan):
+            for sample_num, sample_graph_len in enumerate(conv_sample_num_per_lenpackage):
                 # mark = None  # 表示这次决定 是由哪一个网络判定
                 net_x = conv_x[point:point+sample_graph_len].to(device)
                 point += sample_graph_len
                 output_pre_can_conv = can_conv_net(net_x)
-                print(output_pre_can_conv)
+                # print(output_pre_can_conv)
                 output_pre_sum_can_conv = torch.sum(output_pre_can_conv, dim=0)
-                print(output_pre_sum_can_conv)
+                # print(output_pre_sum_can_conv)
 
                 # 判断 卷积和图判断的是否一致 若不一致 则依照两个相差大的分类判定
                 if torch.argmax(graph_ypred[sample_num]) == torch.argmax(output_pre_sum_can_conv):
@@ -258,6 +262,12 @@ def main(prog_args):
                         pred_conv_error += 1
                         print(f'conv   error  label: {label[sample_num]} pred: {final_pred}')
 
+            # 本次 前进的报文帧数
+            # graph
+            graph_handled_frame += sum(len_can_list)
+            print(f'graph : {graph_handled_frame}')
+            # conv
+            print(f'conv  : {len(conv_x[:point])*conv_frame_num}')
 
 
             # 数据读取完毕

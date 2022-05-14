@@ -235,15 +235,15 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
+    parser.add_argument('--data', type=str, default='../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/0_Training/',
                         help='location of the data corpus')
-    parser.add_argument('--log_dir', type=str, default='../experiment/evo_croasen',
+    parser.add_argument('--log_dir', type=str, default='../../experiment/evo_croasen',
                         help='directory for logging')
     parser.add_argument('--dataset', type=str, default='chc',
                         help='name of the dataset (car hack challenge Dataset...)')
     parser.add_argument('--n_classes', type=int, default=2,
                         help='number of classes for the given dataset normal or intrusion')
-    parser.add_argument('--supernet_path', type=str, default='../experiment/evo_croasen/super_net/super_model_best.pth.tar',
+    parser.add_argument('--supernet_path', type=str, default='../../experiment/evo_croasen/super_net/super_model_best.pth.tar',
                         help='file path to supernet weights')
     parser.add_argument('--subnet', type=str, default='.tmp/iter_0/net_1_subnet.txt',
                         help='location of a json file of config eg: num of gcn')
@@ -403,7 +403,7 @@ if __name__ == '__main__':
 
     parser.set_defaults(max_nodes=81,
                         feature_type='default',
-                        datadir='../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/',
+                        datadir='../../data/Car_Hacking_Challenge_Dataset_rev20Mar2021/0_Preliminary/',
                         lr=0.001,
                         clip=2.0,
                         batch_size=64,
