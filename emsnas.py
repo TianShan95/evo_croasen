@@ -30,11 +30,13 @@ if _DEBUG: from pymoo.visualization.scatter import Scatter
 class EMsNAS:
     def __init__(self, kwargs, args):
         self.search_space = OFASearchSpace()
-        self.save_path = kwargs.pop('save', '.tmp')  # path to save results
+
+
         self.args = args
         self.log_dir = kwargs.pop('log_dir', '../experiment/evo_croasen')
         self.pred_dir = kwargs.pop('pred_dir', 'predictor_dict.pth')
         self.localtime = time.strftime("_%Y%m%d_%H%M%S/", time.localtime())
+        self.save_path = kwargs.pop('save', f'.tmp{self.localtime}')  # path to save results
         self.resume = kwargs.pop('resume', '.tmp/iter_0/')  # resume search from a checkpoint
         self.sec_obj = kwargs.pop('sec_obj', 'params')  # second objective to optimize simultaneously
         self.iterations = kwargs.pop('iterations', 30)  # number of iterations to run search 搜索的 代数
@@ -364,8 +366,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save', type=str, default='.tmp',
-                        help='location of dir to save')
+    # parser.add_argument('--save', type=str, default='.tmp',
+    #                     help='location of dir to save')
     parser.add_argument('--resume', type=str, default='.tmp/iter_0/',
                         help='resume search from a checkpoint')
     parser.add_argument('--sec_obj', type=str, default='flops',
