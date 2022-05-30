@@ -77,7 +77,7 @@ class OFAEvaluator:
     """ based on OnceForAll supernet taken from https://github.com/mit-han-lab/once-for-all """
     def __init__(self,
                  n_classes=2,
-                 model_path='./data/ofa_mbv3_d234_e346_k357_w1.0',
+                 model_path=None,
                  gcn_blocks=None, linear_num=None, direction=None, norm=None, depth=None, width_rate=None, dropout=None, weight_decay=None, out_gcn_vector=None, args=None):
 
 
@@ -109,7 +109,10 @@ class OFAEvaluator:
 
         # 加载模型权重参数
         # init = torch.load(model_path, map_location='cpu')['state_dict']
-        # self.engine.load_weights_from_net(init)
+        if model_path:
+            init = torch.load(model_path)['state_dict']
+            self.engine.load_state_dict(init)
+            # self.engine.load_weights_from_net(init)
 
         # torch.save(self.engine, 'OFAMobileNetV3.pth')
 
@@ -189,7 +192,6 @@ class OFAEvaluator:
             OFAEvaluator.save_net(log_dir, subnet, "%s.init" % save_net_name)
         with open(save_path, 'w') as handle:  # 保存实验结果
             json.dump(info, handle)
-
         print(info)
 
 
@@ -243,7 +245,7 @@ if __name__ == '__main__':
                         help='name of the dataset (car hack challenge Dataset...)')
     parser.add_argument('--n_classes', type=int, default=2,
                         help='number of classes for the given dataset normal or intrusion')
-    parser.add_argument('--supernet_path', type=str, default='../../experiment/evo_croasen/super_net/super_model_best.pth.tar',
+    parser.add_argument('--supernet_path', type=str, default='',
                         help='file path to supernet weights')
     parser.add_argument('--subnet', type=str, default='.tmp_test_di_nor/iter_30/net_3_subnet_di.txt',
                         help='location of a json file of config eg: num of gcn')

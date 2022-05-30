@@ -7,7 +7,6 @@ import subprocess
 import numpy as np
 import torch
 
-from utils import get_correlation
 from evaluator import OFAEvaluator, get_net_info
 
 from pymoo.optimize import minimize
@@ -19,7 +18,7 @@ from pymoo.factory import get_algorithm, get_crossover, get_mutation
 import time
 from search_space.myofa import OFASearchSpace
 from acc_predictor.factory import get_acc_predictor
-from utils import prepare_eval_folder, MySampling, BinaryCrossover, MyMutation
+from utils.utils import prepare_eval_folder, MySampling, BinaryCrossover, MyMutation, get_correlation
 
 _DEBUG = False
 if _DEBUG: from pymoo.visualization.scatter import Scatter
